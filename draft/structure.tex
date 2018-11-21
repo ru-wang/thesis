@@ -1,0 +1,63 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Article Notes
+% Structure Specification File
+% Version 1.0 (1/10/15)
+%
+% This file has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Authors:
+% Vel (vel@latextemplates.com)
+% Christopher Eliot (christopher.eliot@hofstra.edu)
+% Anthony Dardis (anthony.dardis@hofstra.edu)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	REQUIRED PACKAGES
+%----------------------------------------------------------------------------------------
+
+\usepackage[no-math]{xeCJK}
+\usepackage[includeheadfoot,columnsep=1cm,left=1.5cm,right=1.5cm,top=1cm,bottom=1cm]{geometry}
+\usepackage{multicol}
+\usepackage{amsmath, amssymb, blkarray, bm, cases, mathtools, nicefrac, natbib}
+\usepackage[Symbol]{upgreek}
+\usepackage{XCharter, fouriernc}
+\usepackage[hidelinks]{hyperref}
+
+%----------------------------------------------------------------------------------------
+%	CUSTOM COMMANDS
+%----------------------------------------------------------------------------------------
+
+\renewcommand{\today}{\number\year 年 \number\month 月}
+
+\newcommand{\articletitle}[1]{\renewcommand{\articletitle}{#1}}
+\newcommand{\articlesubtitle}[1]{\renewcommand{\articlesubtitle}{#1}}
+\newcommand{\docdate}[1]{\renewcommand{\docdate}{#1}}
+\newcommand{\docauthor}[1]{\renewcommand{\docauthor}{#1}}
+
+\newcommand{\printtitle}{
+  \begin{center}
+  \textbf{\Huge{\articletitle}}
+
+  \textbf{\textit{\Large{\articlesubtitle}}}
+
+  \docdate
+
+  \docauthor
+  \end{center}
+}
+
+%----------------------------------------------------------------------------------------
+%	STRUCTURE MODIFICATIONS
+%----------------------------------------------------------------------------------------
+
+\setlength{\parskip}{10pt}
+\setlength{\parindent}{0pt}
+
+\bibliographystyle{unsrt}
+
+\setCJKmainfont[AutoFakeSlant=true,AutoFakeBold=true]{FZNewShuSong-Z10}
