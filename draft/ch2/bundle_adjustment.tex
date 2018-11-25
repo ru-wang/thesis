@@ -37,7 +37,7 @@
     \bm{x}^\ast &= \mathop{\min}_{\bm{x}} F(\bm{x}) \\
                 &= \mathop{\min}_{\bm{x}}
                    \frac{1}{2} \Vert \mathrm{A}\bm{x} + \bm{b} \Vert^2
-\end{aligned}
+\end{aligned}\label{eq:lls}
 \end{equation}
 
 其中变量$\bm{x}$为$n$维向量，$F(\cdot)$为关于变量$\bm{x}$的标量线性函数，即能量函数。在局部最优解附近，最小化能量函数$F(\cdot)$等同于求解其梯度函数$\bm{g}(\cdot)$的零点（对于线性的函数则为唯一的零点），即：
@@ -50,8 +50,7 @@
     \end{bmatrix}^\top = \bm{0}
 \end{equation}
 
-Apply Newton's method, denote the first-order derivative of $\bm{g}$ as the Hessian of $\mathbf{f}(\cdot)$
-
+根据牛顿法，记梯度$\bm{g}$的一阶导数为海森矩阵（Hessian matrix）：
 \begin{equation}
     \mathrm{H} \doteq \begin{bmatrix}
         \frac{\partial^2 F}{\partial x_1^2} &
@@ -74,8 +73,7 @@ Apply Newton's method, denote the first-order derivative of $\bm{g}$ as the Hess
     \end{bmatrix}
 \end{equation}
 
-Given that $\mathrm{H}$ is rank-sufficient, due to the linearity of the gradient, it is guaranteed that we can achieve the solution by only one step starting with an arbitrary $\bm{x}$ (we choose $\bm{0}$ here) and solving the linear system
-
+\noindent{线性的问题中，当矩阵$\mathrm{H}$为正定矩阵时, 给定任意初值$\bm{x}$（这里选择了初值为$\bm{0}$）只需一步就可解得式\eqref{eq:lls}的极小值。即求解如下线性系统：}
 \begin{equation}
     \mathrm{H} \bm{x} = -\bm{g} \quad
     \Rightarrow \bm{x} = -\mathrm{H}^{-1} \bm{g}
@@ -139,4 +137,4 @@ where $\mathrm{H}$ and $\bm{g}$, we can say, are the approximated Hessian and gr
 
 It has been shown that even for well-constrained nonlinear least squares problems, trust region strategies provide better performance than the Gauss-Newton method, not only in the numerical accuracy but also the rate of convergence, as they will automatically adjust the trust region radius at every iteration according to the gain ratio.
 
-\subsection{鲁棒估计}
+\subsection{鲁棒估计方法}
