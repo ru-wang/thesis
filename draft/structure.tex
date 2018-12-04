@@ -22,12 +22,13 @@
 
 \usepackage[no-math]{xeCJK}
 \usepackage[includeheadfoot,left=3cm,right=2.5cm,top=3cm,bottom=2cm]{geometry}
+%\usepackage[includeheadfoot,left=1.5cm,right=1.5cm,top=2cm,bottom=1cm]{geometry}
 \usepackage{amsmath,amssymb,blkarray,bm,mathtools,nicefrac}
+\usepackage{algorithm,algorithmic,multicol,enumitem,indentfirst}
 \usepackage[square]{natbib}
 \usepackage[Symbol]{upgreek}
 \usepackage[hidelinks]{hyperref}
-\usepackage{XCharter}
-\usepackage{indentfirst}
+\usepackage{XCharter,fouriernc}
 
 %----------------------------------------------------------------------------------------
 %	CUSTOM COMMANDS
@@ -60,8 +61,10 @@
 %----------------------------------------------------------------------------------------
 
 \setlength{\parindent}{2.45em}
+%\setlength{\parskip}{12pt}
 \linespread{1.5}
+\setlist[enumerate,itemize]{itemsep=0mm}
 
 \bibliographystyle{apalike}
 
-\setCJKmainfont[BoldFont=Noto Sans CJK SC Medium]{FZNewShuSong-Z10}
+\setCJKmainfont[BoldFont=Noto Sans CJK SC Bold]{FZNewShuSong-Z10}

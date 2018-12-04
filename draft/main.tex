@@ -10,20 +10,20 @@
 \begin{document}
 
 \pagestyle{myheadings}
-\markright{\articletitle}
 \thispagestyle{plain}
 \printtitle
 
-\newpage
-
 \begin{abstract}
-我是摘要，我超吊。
+    我是摘要，我超吊。
 \end{abstract}
 \addcontentsline{toc}{chapter}{摘要}
 
-\tableofcontents
-\newpage
+% \begin{multicols}{2}
 
+\newpage
+\tableofcontents
+
+\newpage
 \input{ch1/chapter1.tex}
 \input{ch2/chapter2.tex}
 \input{ch3/chapter3.tex}
@@ -31,8 +31,8 @@
 \input{ch5/chapter5.tex}
 
 \newpage
-
 \bibliography{bibliography.bib}
 \addcontentsline{toc}{chapter}{参考文献}
 
+% \end{multicols}{2}
 \end{document}

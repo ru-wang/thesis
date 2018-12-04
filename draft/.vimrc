@@ -1,8 +1,6 @@
-set guifont=inconsolata\ for\ powerline\ 16
-set guifontwide=noto\ sans\ cjk\ sc\ light\ 14
+set guifont=fira\ code\ retina\ 13
+set guifontwide=wenquanyi\ micro\ hei\ 13
 set fillchars=fold:-
 colo typewriter-night
-let g:airline_theme = 'typewriter'
-let g:tagbar_width = 30
+let g:goyo_width = '100'
 call ConfigureTex()
-set lsp=6
