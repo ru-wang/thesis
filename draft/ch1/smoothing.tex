@@ -1,4 +1,4 @@
-\section{基于集束优化的状态估计}
+\section{基于优化方法的状态估计}
 
 目前绝大多数的SLAM算法通过集束优化\citep{triggs1999bundle}（Bundle Adjustment，BA）方法来对状态进行估计在传统的视觉SfM算法中，集束优化是指通过联合优化所有的视觉观测误差来同时求解最优的相机位姿状态和三维点状态的方法。而对于使用了更多传感器的SLAM系统，除了三维点和位姿状态，集束优化算法还需要实时地、持续对系统的其他状态比作出估计。对于视觉惯性SLAM，集束优化通常会通过联合优化所有的视觉观测和惯性观测来同时求解相机或IMU的位姿、速度以及IMU的bias状态。
 
@@ -156,3 +156,62 @@
 \subsubsection*{狗腿法}
 
 \subsection{鲁棒估计方法}
+
+For least squares problems where the minimization may encounter input terms that contain outliers, that is, completely bogus measurements, it is important to use a robust function that reduces their influence\citep{ceres-solver}.
+
+An unconstrained robustified nonlinear least squares (RNLLS) problem modifies the basic NLLS \eqref{eq:nlls}
+
+\begin{equation}\label{eq:rnlls}
+\begin{aligned}
+    \bm{x}^\star &= \mathop{\arg\min}_{\bm{x}} G(\bm{x}) \\
+                 &= \mathop{\arg\min}_{\bm{x}}
+                    \frac{1}{2} \rho
+                    \left( \lVert \mathbf{f}(\bm{x}) \rVert^2 \right)
+\end{aligned}
+\end{equation}
+
+where the scalar function $\rho(\cdot)$ reweights the normal equation. Like solving the NLLS problems, we solve the RNLLS by finding the zero of the robustified gradient
+
+\begin{equation}
+    \bm{g} \doteq \nabla G = \rho' \mathrm{J}^\top \mathbf{f}(\bm{x})
+\end{equation}
+
+Note that $\rho'(\cdot)$ is also function of $\bm{x}$ (the dependence of $\mathrm{J}$ on $\bm{x}$ is ignored since $\mathbf{f}(\cdot)$ is assumed to be linear at current iteration $\mathbf{f}(\bm{x} + \bm{\delta}) \simeq \mathbf{f}(\bm{x}) + \mathrm{J}\bm{\delta}$), so the Hessian of $\bm{g}$ is
+
+\begin{equation}
+\begin{aligned}
+    \mathrm{H}
+           &=
+              \rho' \mathrm{J}^\top \mathrm{J} +
+              \frac{\partial\rho'(\bm{x})}{\partial\bm{x}}
+              \mathbf{f}^\top(\bm{x})\mathrm{J} \\
+           &=
+              \rho' \mathrm{J}^\top \mathrm{J} +
+              \frac{\partial\rho'}{\partial\lVert\mathbf{f}(\bm{x})\rVert^2}
+              \frac{\partial\lVert\mathbf{f}(\bm{x})\rVert^2}{\partial\bm{x}}
+              \mathbf{f}^\top(\bm{x}) \mathrm{J} \\
+           &=
+              \rho' \mathrm{J}^\top \mathrm{J} + \rho''
+              \frac{\partial\lVert\mathbf{f}(\bm{x})\rVert^2}{\partial\bm{x}}
+              \mathbf{f}^\top(\bm{x}) \mathrm{J} \\
+           &\simeq
+              \rho' \mathrm{J}^\top \mathrm{J} + 2\rho''
+              \mathrm{J}^\top \mathbf{f}(\bm{x}) \mathbf{f}^\top(\bm{x}) \mathrm{J} \\
+           &=
+              \mathrm{J}^\top \left(
+                  \rho'\mathrm{I} + 2\rho''
+                  \mathbf{f}(\bm{x}) \mathbf{f}^\top(\bm{x})
+              \right) \mathrm{J}
+\end{aligned}
+\end{equation}
+
+The robustified normal equation is given by
+
+\begin{equation}
+    \mathrm{J}^\top \left(
+        \rho'\mathrm{I} + 2\rho''
+        \mathbf{f}(\bm{x}) \mathbf{f}^\top(\bm{x})
+    \right) \mathrm{J} \bm{\delta}
+    =
+    -\rho' \mathrm{J}^\top \mathbf{f}(\bm{x})
+\end{equation}
