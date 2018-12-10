@@ -6,16 +6,18 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
 
 \subsection{舒尔补}
 
-舒尔补（Schur complement）是一种常用的加速求解稀疏线性系统的方法，也特别适用于集束优化问题中的正规方程的求解。其本质上是基于高斯消元的分块求解线性系统的方法。如下是一个集束优化问题中常见的正规方程的形式，其中$\mathrm{P}$是三维点状态对应的信息矩阵，$\mathrm{C}$是相机状态对应的信息矩阵，$\mathrm{W}$是三维点状态和相机状态的信息矩阵：
+舒尔补（Schur complement）是一种常用的加速求解稀疏线性系统的方法，也特别适用于集束优化问题中的正规方程的求解。其本质上是基于高斯消元的分块求解线性系统的方法。对于一个集束优化问题，经过对调整变量的顺序，可以得到正规方程$\bm{\delta} =\Lambda\setminus\bm{\eta}$：
 \begin{equation}
+    \Lambda \doteq
     \begin{bmatrix}
         \mathrm{P} & \mathrm{W}^\top \\
         \mathrm{W} & \mathrm{C}
-    \end{bmatrix}
-    \begin{bmatrix} \bm{\delta}_p \\ \bm{\delta}_c \end{bmatrix} =
-    \begin{bmatrix} \bm{b}_p      \\ \bm{b}_c      \end{bmatrix}
+    \end{bmatrix};
+    \quad
+    \bm{\eta} \doteq
+    \begin{bmatrix} \bm{\eta}_p \\ \bm{\eta}_c \end{bmatrix}
 \end{equation}
-求解三维点状态和相机状态之前，先通过行变换构建舒尔补方程：
+其中$\mathrm{P}$是三维点状态对应的信息矩阵，$\mathrm{C}$是相机状态对应的信息矩阵，$\mathrm{W}$是三维点状态和相机状态的信息矩阵。求解三维点状态和相机状态之前，先通过行变换构建舒尔补方程：
 \begin{equation}
     \begin{bmatrix}
         \mathrm{P} & \mathrm{W}^\top \\
@@ -23,32 +25,41 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
     \end{bmatrix}
     \begin{bmatrix} \bm{\delta}_p \\ \bm{\delta}_c \end{bmatrix} =
     \begin{bmatrix}
-        \bm{b}_p \\
-        \bm{b}_c-\mathrm{W}\mathrm{P}^{-1}\bm{b}_p
+        \bm{\eta}_p \\
+        \bm{\eta}_c-\mathrm{W}\mathrm{P}^{-1}\bm{\eta}_p
     \end{bmatrix}
 \end{equation}
-其中$\mathrm{C}-\mathrm{W}\mathrm{P}^{-1}\mathrm{W}^\top$称为舒尔补。根据经验，集束优化问题中的三维点状态数量远多于相机状态数量，故矩阵$\mathrm{P}$的规模远大于舒尔补矩阵。通过求解下式
+记舒尔补矩阵为$\mathrm{S}\doteq\mathrm{C}-\mathrm{W}\mathrm{P}^{-1}\mathrm{W}^\top$，右侧为$\bm{b}\doteq{\bm{\eta}_c-\mathrm{W}\mathrm{P}^{-1}\bm{\eta}_p}$。根据经验，集束优化问题中的三维点状态数量远多于相机状态数量，故矩阵$\mathrm{P}$的规模远大于舒尔补矩阵。通过求解下式
 \begin{equation}
-    \bm{\delta}_c = 
-    \left( \mathrm{C}-\mathrm{W}\mathrm{P}^{-1}\mathrm{W}^\top \right)
-    \enspace\setminus\enspace
-    \left( \bm{b}_c-\mathrm{W}\mathrm{P}^{-1}\bm{b}_p \right)
+    \bm{\delta}_c = \mathrm{S} \enspace\setminus\enspace \bm{b}
     \label{eq:solve_schur}
 \end{equation}
-可以快速得到相机状态变量的值。又因为三维点之间没有直接通过因子相连，故其信息矩阵$\mathrm{P}$呈对角块稀疏状，如图\ref{fig:sparse_matrix}所示。因此，$\mathrm{P}^{-1}$矩阵的计算往往非常快速。通过回代，又可以高效地求解剩余变量：
+可以快速得到相机状态变量的值。又因为三维点之间没有直接通过因子相连，故其信息矩阵$\mathrm{P}$呈对角块稀疏状，如图\ref{fig:sparse_matrix}所示。因此$\mathrm{P}^{-1}$矩阵的计算往往非常快速，通过变量回代又可以高效地求解剩余变量：
 \begin{equation}
     \bm{\delta}_p = \mathrm{P}
     \enspace\setminus\enspace
-    \left( \bm{b}_p-\mathrm{W}^\top\bm{b}_c \right)
+    \left( \bm{\eta}_p-\mathrm{W}^\top\bm{\delta}_c \right)
     \label{eq:back_sub}
 \end{equation}
 
-对于如图\ref{fig:factor_graph}所示的因子图。
+舒尔补虽然可以大幅加速集束优化的求解，但是在标准的集束优化算法中，每一轮迭代重新构建舒尔补方程的过程仍然需要耗费大量的时间。如前面提到的，SLAM问题具有很好的局部性，每一轮求解一般都只有一小部分较新的变量有所更新，如果采用增量式的方法，每一轮迭代时只重新计算这些变量在舒尔补方程中对应的部分，则可以进一步减少计算量。
+
+\subsection{增量舒尔补}
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=.8\textwidth]{figs/factor_graph.png}
+    \caption{因子图}
+    \label{fig:factor_graph}
+\end{figure}
+
+如图\ref{fig:factor_graph}是一个常见集束优化问题的因子图示例，其对应的正规方程具有如图\ref{fig:normal_eq}所示的稀疏结构。
 
 \begin{figure}[htb]
     \centering
     \includegraphics{figs/normal_eq.png}
-    \caption{正规方程}
+    \caption{正规方程：左上角块对角矩阵部分对应三维点状态的信息矩阵$\mathrm{P}$，右下角部分为相机状态对应的信息矩阵$\mathrm{C}$，左下角和右上角为矩阵$\mathrm{W}$和$\mathrm{W}^\top$。}
+    \label{fig:normal_eq}
 \end{figure}
 
 \begin{figure}[htb]
@@ -63,11 +74,9 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
     \caption{计算舒尔补}
 \end{figure}
 
-\subsection{增量更新舒尔补}
-
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=\textwidth]{figs/factor_graph_dirty.png}
+    \includegraphics[width=.8\textwidth]{figs/factor_graph_dirty.png}
     \caption{标记因子图待更新部分}
 \end{figure}
 
@@ -83,11 +92,9 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
     \caption{更新舒尔补}
 \end{figure}
 
-\subsection{状态增广}
-
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=\textwidth]{figs/factor_graph_aug.png}
+    \includegraphics[width=.8\textwidth]{figs/factor_graph_aug.png}
     \caption{增广因子图}
 \end{figure}
 
@@ -103,8 +110,6 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
     \caption{更新正规方程}
 \end{figure}
 
-\subsection{增量舒尔补方法和基于贝叶斯树的增量方法对比}
-
 \begin{figure}[htb]
     \centering
     \includegraphics{figs/sqrt_info.png}
@@ -113,7 +118,7 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=\textwidth]{figs/elim.png}
+    \includegraphics[width=.8\textwidth]{figs/elim.png}
     \caption{消元}
 \end{figure}
 

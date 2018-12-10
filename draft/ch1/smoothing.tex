@@ -8,12 +8,12 @@
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=\textwidth]{figs/factor_graph.png}
+    \includegraphics[width=.8\textwidth]{figs/isam_factor_graph.png}
     \caption{因子图示例\citep{kaess2012isam2}：紫色节点代表位姿状态，绿色节点代表三维点状态，黑色节点代表状态之间的约束因子。}
-    \label{fig:factor_graph}
+    \label{fig:isam_factor_graph}
 \end{figure}
 
-图\ref{fig:factor_graph}展示了一类常见的因子图结构。按照图示的例子，一个SLAM问题中可能存在的约束有状态变量的先验约束$p$，相邻状态之间的相对位姿约束$u_1 \dots u_n$，非相邻状态之间的回路闭合约束$c_1,c_2$以及视觉观测约束$m_1 \dots m_4$等。而求解完整集束优化的过程就相当于最大化整个因子图中的所有约束的集合$\mathcal{Z}$关于所有状态集合$\mathcal{X}$的联合条件概率：
+图\ref{fig:isam_factor_graph}展示了一类常见的因子图结构。按照图示的例子，一个SLAM问题中可能存在的约束有状态变量的先验约束$p$，相邻状态之间的相对位姿约束$u_1 \dots u_n$，非相邻状态之间的回路闭合约束$c_1,c_2$以及视觉观测约束$m_1 \dots m_4$等。而求解完整集束优化的过程就相当于最大化整个因子图中的所有约束的集合$\mathcal{Z}$关于所有状态集合$\mathcal{X}$的联合条件概率：
 \begin{equation}
     P(\mathcal{Z}|\mathcal{X}) = \prod_{f_i\in\mathcal{Z}} P(f_i(\mathcal{X}_i))
 \end{equation}
