@@ -11,11 +11,11 @@
   \item 基于关键帧（keyframe）：只估计一部分选定的携带了足够信息的历史状态，如RKSLAM\citep{liu2016robust}、OKVIS\citep{leutenegger2015keyframe}等。
 \end{itemize}
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=.5\textwidth]{./figs/sparse_matrix.png}
-  \caption{一般的稀疏矩阵结构}
-  \label{fig:sparse_matrix}
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=.8\textwidth]{./figs/sparse_matrix.png}
+    \caption{一般的稀疏矩阵结构}
+    \label{fig:sparse_matrix}
 \end{figure}
 
 当然，以上的方法通常也可以结合使用。另一种策略是通过深入分析集束优化问题的特点，做针对性优化，减少冗余的计算。集束优化问题通常具有非常特殊的性质，合理利用这些性质，可以帮助我们更高效地求解SLAM系统的状态估计。比如，在SLAM系统中，通常需要求解的三维点变量的数量要远大于状态变量的数量，而且通常状态约束（constraints）集中在状态与状态之间、状态与三维点之间。这就导致集束优化构建的标准方程（normal equation）具有特别的稀疏结构，如图\ref{fig:sparse_matrix}所示：

@@ -10,7 +10,7 @@
 
 然而正确地使用IMU并不是一件容易的事情。和所有传感器一样，IMU信号也带有误差，不管是使用滤波的方法还是非线性优化的方法处理IMU信息，我们都要对其进行合理的建模。我们可以将IMU的输出数据（IMU对实际运动的观测）和输入数据（实际的物理运动）的差异定义为IMU读数的误差，它可能包含偏移\footnote{bias，指IMU输出值和输入值之间的偏移，可能受温度、重力等因素的影响}、随机游走噪声\footnote{random walk，指当输入固定时，IMU输出值中包含的随机噪声，它随时间的变化可被认为是一个随机过程}、尺度系数\footnote{scale factor，指的是输出和输入之间相差的一个倍数}、不正交性\footnote{non-orthogonality，指由于IMU各轴并不完全正交所带来的误差}等等\citep[see][]{imu2014}。如图\ref{fig:common_imu_errors}展示了一种常见的IMU误差模型。
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
     \centering
     \includegraphics[width=.3\textwidth]{./figs/common_imu_errors.png}
     \caption{一般的IMU误差模型\citep{imu2014}}
@@ -288,7 +288,7 @@ MSCKF算法是无结构信息的，也就是只估计相机/IMU的状态，而�
 
 传统的VISLAM或VIO算法，IMU项参与优化的方式一般非常直接——使用IMU积分得到状态先验，再和视觉观测融合，如此反复。例如OKVIS中的非线性优化（下图是OKVIS优化的因子图）。
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
     \centering
     \includegraphics[width=.5\textwidth]{./figs/okvis.png}
     \caption{OKVIS因子图示例图\citep{leutenegger2015keyframe}}
@@ -304,7 +304,7 @@ MSCKF算法是无结构信息的，也就是只估计相机/IMU的状态，而�
         \sum_{i} \sum_{l} \lVert \mathbf{r}_{\mathcal{C}_{il}} \rVert^2_{\mathrm\Sigma_{C}}
 \end{equation}
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
     \centering
     \includegraphics[width=.8\textwidth]{./figs/preint.png}
     \caption{IMU预积分因子图示例\citep{forster2017manifold}}
