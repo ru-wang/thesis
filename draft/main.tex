@@ -10,7 +10,7 @@
 \begin{document}
 
 \pagestyle{myheadings}
-\thispagestyle{plain}
+\thispagestyle{empty}
 \printtitle
 
 \begin{abstract}
@@ -21,9 +21,14 @@
 % \begin{multicols}{2}
 
 \newpage
+\setcounter{page}{1}
+\pagenumbering{roman}
 \tableofcontents
 
 \newpage
+\setcounter{page}{1}
+\pagenumbering{arabic}
+
 \input{ch1/chapter1.tex}
 \input{ch2/chapter2.tex}
 \input{ch3/chapter3.tex}
