@@ -28,6 +28,7 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
         \bm{\eta}_p \\
         \bm{\eta}_c-\mathrm{W}\mathrm{P}^{-1}\bm{\eta}_p
     \end{bmatrix}
+    \label{eq:schur_complement}
 \end{equation}
 记舒尔补矩阵为$\mathrm{S}\doteq\mathrm{C}-\mathrm{W}\mathrm{P}^{-1}\mathrm{W}^\top$，右侧为$\bm{b}\doteq{\bm{\eta}_c-\mathrm{W}\mathrm{P}^{-1}\bm{\eta}_p}$。根据经验，集束优化问题中的三维点状态数量远多于相机状态数量，故矩阵$\mathrm{P}$的规模远大于舒尔补矩阵。通过求解下式
 \begin{equation}
@@ -53,37 +54,43 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
     \label{fig:factor_graph}
 \end{figure}
 
-如图\ref{fig:factor_graph}是一个常见集束优化问题的因子图示例，其对应的正规方程具有如图\ref{fig:normal_eq}所示的稀疏结构。
+如图\ref{fig:factor_graph}是一个常见集束优化问题的因子图示例，其对应的正规方程具有如图\ref{fig:normal_eq}所示的稀疏结构。按照式\eqref{eq:schur_complement}构建相机部分方程的舒尔补，依次迭代计算每一个三维点状态对应的舒尔补部分，并累加到图\ref{fig:reduced_sys}中的高亮部分所示的舒尔补中。图\ref{fig:schur_complement}展示了计算舒尔补的第一次迭代。
 
 \begin{figure}[htb!]
     \centering
     \includegraphics{figs/normal_eq.png}
-    \caption{正规方程：左上角块对角矩阵部分对应三维点状态的信息矩阵$\mathrm{P}$，右下角部分为相机状态对应的信息矩阵$\mathrm{C}$，左下角和右上角为矩阵$\mathrm{W}$和$\mathrm{W}^\top$。}
+    \caption{正规方程：左上角块对角矩阵部分对应三维点状态$1$至$6$的信息矩阵$\mathrm{P}$，右下角部分为相机状态$1$至$5$对应的信息矩阵$\mathrm{C}$，左下角和右上角为矩阵$\mathrm{W}$和$\mathrm{W}^\top$；中间列向量从上至下依次对应三维点状态$1$至$6$和相机状态$1$至$5$的迭代步；右侧部分从上至下依次对应三维点状态$1$至$6$和相机状态$1$至$5$。}
     \label{fig:normal_eq}
 \end{figure}
 
 \begin{figure}[htb!]
     \centering
     \includegraphics{figs/reduced_sys.png}
-    \caption{舒尔补}
+    \caption{舒尔补：高亮部分为相机状态对应舒尔补方程，其余部分为原方程。}
+    \label{fig:reduced_sys}
 \end{figure}
 
 \begin{figure}[htb!]
     \centering
     \includegraphics[width=\textwidth]{figs/schur_complement.png}
     \caption{计算舒尔补}
+    \label{fig:schur_complement}
 \end{figure}
 
 \begin{figure}[htb!]
     \centering
     \includegraphics[width=.8\textwidth]{figs/factor_graph_dirty.png}
-    \caption{标记因子图待更新部分}
+    \caption{因子图待更新部分：相机状态$5$为脏变量；与其直接相连的因子为脏因子；相机状态$4$和三维点状态$6$为只有梯度发生了变化的脏变量。}
+    \label{fig:factor_graph_dirty}
 \end{figure}
+
+增量更新舒尔补的方法关键在于尽可能地复用上一次迭代的结果，只针对性地计算舒尔补方程中变化较大的变量对应的部分。以因子图\ref{fig:factor_graph}为例，假设只有相机状态$5$有较大的更新，则先将其标记为脏变量。在因子图中，只有与脏变量直接相连的因子需要标记为脏因子，如图\ref{fig:factor_graph_dirty}所示。需要注意的是，尽管相机状态$5$和三维点状态$6$的值并未发生足够大的改变，但是由于与之相邻的部分因子被标记为脏因子，因此也需要更新这些因子关于它们的雅各比矩阵。等价地，图\ref{fig:normal_eq_dirty}高亮展示了对应的舒尔补方程中需要更新的部分。
 
 \begin{figure}[htb!]
     \centering
     \includegraphics{figs/normal_eq_cursed.png}
     \caption{待更新舒尔补部分}
+    \label{fig:normal_eq_dirty}
 \end{figure}
 
 \begin{figure}[htb!]
@@ -132,14 +139,12 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
     \centering
     \caption{增量式集束优化算法对比：ICE-BA，SLAM++，iSAM2}
     \vspace{6pt}
-    \begin{tabularx}{\textwidth}{c|XXX}
+    \begin{tabularx}{\textwidth}{c|X|X|X}
         \toprule
-                        & \textbf{变量分组/排序} & \textbf{线性求解}            & \textbf{状态更新} \\
-        \midrule
-        \textbf{ICE-BA} & 三维点独立成组         & 增量舒尔补+松弛PCG           & 根据步长直接判断  \\
-        \textbf{SLAM++} & 三维点独立成组         & 增量舒尔补+乔里斯基分解      & 根据步长直接判断  \\
-        \textbf{iSAM2}  & CCOLAMD自动分组        & 基于贝叶树的即时线性化和求解 & 根据贝叶斯树推断  \\
-        \bottomrule
+                        & \textbf{变量分组/排序} & \textbf{线性求解}            & \textbf{状态更新} \\ \hline
+        \textbf{ICE-BA} & 三维点独立成组         & 增量舒尔补+松弛PCG           & 根据步长直接判断  \\ \hline
+        \textbf{SLAM++} & 三维点独立成组         & 增量舒尔补+乔里斯基分解      & 根据步长直接判断  \\ \hline
+        \textbf{iSAM2}  & CCOLAMD自动分组        & 基于贝叶树的即时线性化和求解 & 根据贝叶斯树推断  \\ \bottomrule
     \end{tabularx}
     \label{tab:comp}
 \end{table}
