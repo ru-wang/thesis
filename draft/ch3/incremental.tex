@@ -46,7 +46,7 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
 
 \subsection{增量舒尔补}
 
-\begin{figure}[htb]
+\begin{figure}[htb!]
     \centering
     \includegraphics[width=.8\textwidth]{figs/factor_graph.png}
     \caption{因子图}
@@ -55,75 +55,91 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
 
 如图\ref{fig:factor_graph}是一个常见集束优化问题的因子图示例，其对应的正规方程具有如图\ref{fig:normal_eq}所示的稀疏结构。
 
-\begin{figure}[htb]
+\begin{figure}[htb!]
     \centering
     \includegraphics{figs/normal_eq.png}
     \caption{正规方程：左上角块对角矩阵部分对应三维点状态的信息矩阵$\mathrm{P}$，右下角部分为相机状态对应的信息矩阵$\mathrm{C}$，左下角和右上角为矩阵$\mathrm{W}$和$\mathrm{W}^\top$。}
     \label{fig:normal_eq}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[htb!]
     \centering
     \includegraphics{figs/reduced_sys.png}
     \caption{舒尔补}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[htb!]
     \centering
     \includegraphics[width=\textwidth]{figs/schur_complement.png}
     \caption{计算舒尔补}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[htb!]
     \centering
     \includegraphics[width=.8\textwidth]{figs/factor_graph_dirty.png}
     \caption{标记因子图待更新部分}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[htb!]
     \centering
     \includegraphics{figs/normal_eq_cursed.png}
     \caption{待更新舒尔补部分}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[htb!]
     \centering
     \includegraphics[width=\textwidth]{figs/schur_update.png}
     \caption{更新舒尔补}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[htb!]
     \centering
     \includegraphics[width=.8\textwidth]{figs/factor_graph_aug.png}
     \caption{增广因子图}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[htb!]
     \centering
     \includegraphics{figs/normal_eq_aug.png}
     \caption{增广正规方程}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[htb!]
     \centering
     \includegraphics{figs/normal_eq_update.png}
     \caption{更新正规方程}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[htb!]
     \centering
     \includegraphics{figs/sqrt_info.png}
     \caption{平方根信息矩阵}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[htb!]
     \centering
     \includegraphics[width=.8\textwidth]{figs/elim.png}
     \caption{消元}
 \end{figure}
 
-\begin{figure}[htb]
+\begin{figure}[htb!]
     \centering
     \includegraphics[width=\textwidth]{figs/bayes_tree.png}
     \caption{贝叶斯树}
 \end{figure}
+
+\begin{table}[htb!]
+    \centering
+    \caption{增量式集束优化算法对比：ICE-BA，SLAM++，iSAM2}
+    \vspace{6pt}
+    \begin{tabularx}{\textwidth}{c|XXX}
+        \toprule
+                        & \textbf{变量分组/排序} & \textbf{线性求解}            & \textbf{状态更新} \\
+        \midrule
+        \textbf{ICE-BA} & 三维点独立成组         & 增量舒尔补+松弛PCG           & 根据步长直接判断  \\
+        \textbf{SLAM++} & 三维点独立成组         & 增量舒尔补+乔里斯基分解      & 根据步长直接判断  \\
+        \textbf{iSAM2}  & CCOLAMD自动分组        & 基于贝叶树的即时线性化和求解 & 根据贝叶斯树推断  \\
+        \bottomrule
+    \end{tabularx}
+    \label{tab:comp}
+\end{table}

@@ -6,7 +6,7 @@
 
 图优化方法是分析并求解SLAM后端状态估计问题的常用工具。最早在机器人领域，为了解决多段激光传感器数据额融合时的全局一致性问题，\citep{lu1997globally,lu1997robot}提出了基于位姿图的优化方法。\citeauthor{thrun2006graph}在此基础上进一步提出了GraphSLAM\citep{thrun2006graph}，使用由位姿状态和三维点状态以及它们之间的约束构成的因子图来描述集束优化问题。因子图可以很直观地描述集束优化问题中状态和约束之间的关联，有助于分析集束优化问题的各种性质。经过长时间的发展，图优化方法已经成为SLAM领域的经典方法。
 
-\begin{figure}[htb]
+\begin{figure}[htb!]
     \centering
     \includegraphics[width=.8\textwidth]{figs/isam_factor_graph.png}
     \caption{因子图示例\citep{kaess2012isam2}：紫色节点代表位姿状态，绿色节点代表三维点状态，黑色节点代表状态之间的约束因子。}

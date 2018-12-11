@@ -15,7 +15,7 @@
     \item \textbf{局部变量更新策略：}通过设置一个阈值$\epsilon$，在求解得到变量的增量$\Delta$后，根据其是否满足$|\Delta|>\epsilon$来判断是否需要更新这个变量。
 \end{enumerate}
 
-\begin{figure}[htb]
+\begin{figure}[htb!]
     \centering
     \includegraphics[width=.8\textwidth]{./figs/sparse_pattern.png}
     \caption{信息矩阵稀疏结构\citep{kaess2008isam}：左图代表按照一般的消元顺序得到的平方根信息矩阵，右图代表先使用COLAMD算法选择一个较优的消元顺序，然后得到的平方根信息矩阵。可见，变量消去顺序对矩阵分解产生的填充现象有巨大影响。}
