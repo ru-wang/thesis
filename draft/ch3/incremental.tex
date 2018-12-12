@@ -17,20 +17,18 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
     \bm{\eta} \doteq
     \begin{bmatrix} \bm{\eta}_p \\ \bm{\eta}_c \end{bmatrix}
 \end{equation}
-其中$\mathrm{P}$是三维点状态对应的信息矩阵，$\mathrm{C}$是相机状态对应的信息矩阵，$\mathrm{W}$是三维点状态和相机状态的信息矩阵。求解三维点状态和相机状态之前，先通过行变换构建舒尔补方程：
+其中$\mathrm{P}$是三维点状态对应的信息矩阵，$\mathrm{C}$是相机状态对应的信息矩阵，$\mathrm{W}$是三维点状态和相机状态的信息矩阵。求解三维点状态和相机状态之前，先通过行变换构建舒尔补方程组：
 \begin{equation}
-    \begin{bmatrix}
-        \mathrm{P} & \mathrm{W}^\top \\
-                 0 & \mathrm{C}-\mathrm{W}\mathrm{P}^{-1}\mathrm{W}^\top
-    \end{bmatrix}
-    \begin{bmatrix} \bm{\delta}_p \\ \bm{\delta}_c \end{bmatrix} =
-    \begin{bmatrix}
-        \bm{\eta}_p \\
-        \bm{\eta}_c-\mathrm{W}\mathrm{P}^{-1}\bm{\eta}_p
-    \end{bmatrix}
+    \left\{
+        \begin{array}{rl}
+            \mathrm{P} \bm{\delta}_p + \mathrm{W}^\top \bm{\delta}_c &= \bm{\eta}_p \\
+            \left( \mathrm{C}-\mathrm{W}\mathrm{P}^{-1}\mathrm{W}^\top \right) \bm{\delta}_c &= \bm{\eta}_c-\mathrm{W}\mathrm{P}^{-1}\bm{\eta}_p
+        \end{array}
+    \right.
     \label{eq:schur_complement}
 \end{equation}
-记舒尔补矩阵为$\mathrm{S}\doteq\mathrm{C}-\mathrm{W}\mathrm{P}^{-1}\mathrm{W}^\top$，右侧为$\bm{b}\doteq{\bm{\eta}_c-\mathrm{W}\mathrm{P}^{-1}\bm{\eta}_p}$。根据经验，集束优化问题中的三维点状态数量远多于相机状态数量，故矩阵$\mathrm{P}$的规模远大于舒尔补矩阵。通过求解下式
+
+记舒尔补矩阵为$\mathrm{S}\doteq\mathrm{C}-\mathrm{W}\mathrm{P}^{-1}\mathrm{W}^\top$，右侧为$\bm{b}\doteq{\bm{\eta}_c-\mathrm{W}\mathrm{P}^{-1}\bm{\eta}_p}$。根据经验，集束优化问题中的三维点状态数量远多于相机状态数量，故矩阵$\mathrm{P}$的规模远大于舒尔补矩阵。通过求解下舒尔补方程：
 \begin{equation}
     \bm{\delta}_c = \mathrm{S} \enspace\setminus\enspace \bm{b}
     \label{eq:solve_schur}
@@ -73,25 +71,98 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
 \begin{figure}[htb!]
     \centering
     \includegraphics[width=\textwidth]{figs/schur_complement.png}
-    \caption{计算舒尔补}
+    \caption{计算舒尔补的一次迭代：从左上角开始依次迭代计算每一个三维点对应的舒尔补部分，并累加到右下角相机部分中。}
     \label{fig:schur_complement}
 \end{figure}
+
+\subsubsection*{标记脏子图}
 
 \begin{figure}[htb!]
     \centering
     \includegraphics[width=.8\textwidth]{figs/factor_graph_dirty.png}
-    \caption{因子图待更新部分：相机状态$5$为脏变量；与其直接相连的因子为脏因子；相机状态$4$和三维点状态$6$为只有梯度发生了变化的脏变量。}
+    \caption{因子图待更新部分：相机状态$5$为脏变量；与其直接相连的因子为脏因子；相机状态$4$和三维点状态$6$为只有梯度发生了变化的脏变量。这些节点构成了一个脏子图。}
     \label{fig:factor_graph_dirty}
 \end{figure}
 
-增量更新舒尔补的方法关键在于尽可能地复用上一次迭代的结果，只针对性地计算舒尔补方程中变化较大的变量对应的部分。以因子图\ref{fig:factor_graph}为例，假设只有相机状态$5$有较大的更新，则先将其标记为脏变量。在因子图中，只有与脏变量直接相连的因子需要标记为脏因子，如图\ref{fig:factor_graph_dirty}所示。需要注意的是，尽管相机状态$5$和三维点状态$6$的值并未发生足够大的改变，但是由于与之相邻的部分因子被标记为脏因子，因此也需要更新这些因子关于它们的雅各比矩阵。等价地，图\ref{fig:normal_eq_dirty}高亮展示了对应的舒尔补方程中需要更新的部分。
+增量更新舒尔补的方法关键在于尽可能地复用上一次迭代的结果，只针对性地计算舒尔补方程中变化较大的变量对应的部分。以因子图\ref{fig:factor_graph}为例，假设只有相机状态$5$有较大的更新，则先将其标记为脏变量。在因子图中，只有与脏变量直接相连的因子需要标记为脏因子，如图\ref{fig:factor_graph_dirty}所示。需要注意的是，尽管相机状态$5$和三维点状态$6$的值并未发生足够大的改变，但是由于与之相邻的部分因子被标记为脏因子，因此也需要更新这些因子关于它们的雅各比矩阵。这些脏变量和脏因子共同组成了一个脏子图，对应地，图\ref{fig:normal_eq_dirty}高亮标示了舒尔补方程中需要更新的脏块。算法\ref{alg:mark_dirty}详细说明了如何通过一个简单的宽度优先搜索标记出因子图中的脏子图。
+
+\begin{algorithm}
+\caption{标记脏子图}
+\begin{algorithmic}
+    \REQUIRE 因子图$\check{\mathcal{G}}=\{\check{\mathcal{F}},\check{\Theta},\check{\mathcal{E}}\}$，
+             迭代步长$\bm{\delta}$
+    \ENSURE 脏子图$\mathcal{G}=\{\mathcal{F},\Theta,\mathcal{E}\}$
+
+    \STATE $\mathcal{F}\coloneqq\{\},\Theta\coloneqq\{\},\mathcal{E}\coloneqq\{\}$
+
+    \FORALL{$\lVert\bm{\delta}_i\rVert \geq \varepsilon$}
+        \STATE 将变量$\bm{\theta}_i$标记为脏变量：$\Theta\coloneqq\Theta\cup\{\bm{\theta}_i\}$
+
+        \FORALL{$\mathbf{f}_j(\Theta_j),\bm{\theta}_i\in\Theta_j$}
+        \STATE 记录变量$\bm{\theta}_i$与因子$\mathbf{f}_j$相连的边$e_{ij}$：
+               $\mathcal{E} \coloneqq \mathcal{E} \cup \{e_{ij}\}$
+        \STATE 将因子$\mathbf{f}_j$标记为脏因子：
+               $\mathcal{F} \coloneqq \mathcal{F} \cup \{\mathbf{f}_j\}$
+        \ENDFOR
+
+    \ENDFOR
+\end{algorithmic}
+\label{alg:mark_dirty}
+\end{algorithm}
 
 \begin{figure}[htb!]
     \centering
-    \includegraphics{figs/normal_eq_cursed.png}
-    \caption{待更新舒尔补部分}
+    \includegraphics{figs/normal_eq_dirty.png}
+    \caption{图\ref{fig:factor_graph_dirty}对应的舒尔补方程中的脏块：相机状态$4$、$5$和三维点状态$6$构成的线性子系统。}
     \label{fig:normal_eq_dirty}
 \end{figure}
+
+\subsubsection*{重新计算舒尔补}
+
+舒尔补方程中被标记为脏块的矩阵构成了一个线性子系统，对应因子图中的脏子图。在增量更新舒尔补的过程中，需要先从舒尔补方程中减去脏子图的贡献，随后重新线性化所有的脏因子，最后重新计算舒尔补。算法\ref{alg:schur_update}详细描述了这个过程。
+
+\begin{algorithm}
+\caption{增量更新舒尔补}
+\begin{algorithmic}
+    \REQUIRE 脏子图$\mathcal{G}=\{\mathcal{F},\Theta,\mathcal{E}\}$，
+             上一轮迭代产生的迭代步长$\Delta$，
+             $\check{\mathrm{P}},\check{\mathrm{W}},\check{\mathrm{S}}$和
+             $\check{\bm{\eta}}_p,\check{\bm{b}}$
+    \ENSURE 更新后的
+            $\mathrm{P},\mathrm{W},\mathrm{S}$和
+            $\bm{\eta}_p,\bm{b}$
+
+    \STATE $\bm{\eta}_p=\check{\bm{\eta}},\bm{b}=\check{\bm{b}}$
+
+    \FORALL{三维点状态$\bm{\theta}_{p_i}\in{\Theta}$}
+        \STATE 减去三维点对舒尔补的贡献：
+        \[\begin{aligned}
+                \mathrm{S} &\coloneqq \mathrm{S} + \mathrm{W}_i{\mathrm{P}_{ii}}^{-1}   {\mathrm{W}_i}^\top \\
+                \bm{b}     &\coloneqq \bm{b}     + \mathrm{W}_i{\mathrm{P}_{ii}}^{-1}{\bm{\eta}_{p_i}}^\top
+        \end{aligned}\]
+    \ENDFOR
+
+    \STATE 重新计算脏因子$\mathcal{F}(\Theta)$对正规方程的贡献：
+    \[\begin{aligned}
+            \Lambda    &\coloneqq \Lambda - \mathrm{J}^\top \mathrm{J}                                   \\
+            \bm{\eta}  &\coloneqq \bm{\eta} + \mathrm{J}^\top \bm{r}                                     \\
+            \mathrm{J} &\coloneqq \frac{\partial{\mathcal{F}(\Theta+\Delta)}}{\partial{(\Theta+\Delta)}} \\
+            \bm{r}     &\coloneqq \mathcal{F}(\Theta+\Delta)                                             \\
+            \Lambda    &\coloneqq \Lambda + \mathrm{J}^\top \mathrm{J}                                   \\
+            \bm{\eta}  &\coloneqq \bm{\eta} - \mathrm{J}^\top \bm{r}
+    \end{aligned}\]
+
+    \FORALL{三维点状态$\bm{\theta}_{p_i}\in{\Theta}$}
+        \STATE 更新三维点对舒尔补的贡献：
+        \[\begin{aligned}
+                \mathrm{S} &\coloneqq \mathrm{S} - \mathrm{W}_i{\mathrm{P}_{ii}}^{-1}   {\mathrm{W}_i}^\top \\
+                \bm{b}     &\coloneqq \bm{b}     - \mathrm{W}_i{\mathrm{P}_{ii}}^{-1}{\bm{\eta}_{p_i}}^\top
+        \end{aligned}\]
+    \ENDFOR
+
+\end{algorithmic}
+\label{alg:schur_update}
+\end{algorithm}
 
 \begin{figure}[htb!]
     \centering
@@ -104,6 +175,8 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
     \includegraphics[width=.8\textwidth]{figs/factor_graph_aug.png}
     \caption{增广因子图}
 \end{figure}
+
+\subsubsection*{增加新的状态}
 
 \begin{figure}[htb!]
     \centering
@@ -139,12 +212,11 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
     \centering
     \caption{增量式集束优化算法对比：ICE-BA，SLAM++，iSAM2}
     \vspace{6pt}
-    \begin{tabularx}{\textwidth}{c|X|X|X}
-        \toprule
-                        & \textbf{变量分组/排序} & \textbf{线性求解}            & \textbf{状态更新} \\ \hline
-        \textbf{ICE-BA} & 三维点独立成组         & 增量舒尔补+松弛PCG           & 根据步长直接判断  \\ \hline
-        \textbf{SLAM++} & 三维点独立成组         & 增量舒尔补+乔里斯基分解      & 根据步长直接判断  \\ \hline
-        \textbf{iSAM2}  & CCOLAMD自动分组        & 基于贝叶树的即时线性化和求解 & 根据贝叶斯树推断  \\ \bottomrule
+    \begin{tabularx}{\textwidth}{lXXX}
+               & 变量分组/排序   & 线性求解                     & 状态更新          \\ \hline
+        ICE-BA & 三维点独立成组  & 增量舒尔补+共轭梯度法        & 根据步长直接判断  \\
+        SLAM++ & 三维点独立成组  & 增量舒尔补+乔里斯基分解      & 根据步长直接判断  \\
+        iSAM2  & CCOLAMD自动分组 & 基于贝叶树的即时线性化和求解 & 根据贝叶斯树推断  \\
     \end{tabularx}
     \label{tab:comp}
 \end{table}

@@ -24,20 +24,26 @@
 \usepackage[includeheadfoot,left=3cm,right=2.5cm,top=3cm,bottom=2cm]{geometry}
 %\usepackage[includeheadfoot,left=1.5cm,right=1.5cm,top=2cm,bottom=1cm]{geometry}
 \usepackage{amsmath,amssymb,blkarray,bm,mathtools,nicefrac}
-\usepackage{algorithm,algorithmic,multicol,enumitem,indentfirst,tabularx,booktabs}
+\usepackage{algorithm,algorithmic,multicol,enumitem,indentfirst,tabularx}
+\usepackage[font=small]{caption}
 \usepackage[square]{natbib}
-\usepackage[Symbol]{upgreek}
 \usepackage[hidelinks]{hyperref}
+\usepackage{newtxtext,newtxmath}
 
 %----------------------------------------------------------------------------------------
 %	CUSTOM COMMANDS
 %----------------------------------------------------------------------------------------
 
 \renewcommand{\today}{\number\year 年 \number\month 月}
+\renewcommand{\abstractname}{摘要}
 \renewcommand\contentsname{目录}
 \renewcommand\figurename{图}
 \renewcommand\tablename{表}
 \renewcommand\refname{参考文献}
+
+\floatname{algorithm}{算法}
+\renewcommand{\algorithmicrequire}{\textbf{输入：}}
+\renewcommand{\algorithmicensure}{\textbf{输出：}}
 
 \newcommand{\articletitle}[1]{\renewcommand{\articletitle}{#1}}
 \newcommand{\articlesubtitle}[1]{\renewcommand{\articlesubtitle}{#1}}
@@ -66,4 +72,4 @@
 
 \bibliographystyle{apalike}
 
-\setCJKmainfont[AutoFakeBold=true,AutoFakeSlant=true]{FangSong}
+\setCJKmainfont[AutoFakeBold=true,AutoFakeSlant=true]{FZNewShuSong-Z10}
