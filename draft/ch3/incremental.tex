@@ -88,7 +88,8 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
 
 \begin{algorithm}
 \caption{标记脏子图}
-\begin{algorithmic}
+\begin{algorithmic}[1]
+    \algsetup{linenodelimiter=\ }
     \REQUIRE 因子图$\check{\mathcal{G}}=\{\check{\mathcal{F}},\check{\Theta},\check{\mathcal{E}}\}$，
              迭代步长$\bm{\delta}$
     \ENSURE 脏子图$\mathcal{G}=\{\mathcal{F},\Theta,\mathcal{E}\}$
@@ -123,7 +124,8 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
 
 \begin{algorithm}
 \caption{增量更新舒尔补}
-\begin{algorithmic}
+\begin{algorithmic}[1]
+    \algsetup{linenodelimiter=\ }
     \REQUIRE 脏子图$\mathcal{G}=\{\mathcal{F},\Theta,\mathcal{E}\}$，
              上一轮迭代产生的迭代步长$\Delta$，
              $\check{\mathrm{P}},\check{\mathrm{W}},\check{\mathrm{S}}$和

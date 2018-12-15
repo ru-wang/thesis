@@ -137,7 +137,7 @@
 阻尼因子控制住了每次迭代计算的步长的模。通常阻尼因子$\mu$具备下面三个性质\citep{tingleff2004methods}：
 \begin{enumerate}
     \item 对于任意的$\mu>0$，海森矩阵$(\mathrm{J}^\top\mathrm{J}+\mu\mathrm{I})$正定，这一点保证了求得的步长$\bm{\delta}$处于能量下降的方向；
-    \item 当$\mu\to\infty$时，求得的步长$\bm{\delta}$接近于梯度下降方向$-\frac{1}{\mu}\mathrm{J}^\top\mathbf{f}(\bm{x})$，当当前的变量$\bm{x}$ 的值距离最优解较远时，梯度下降的方向更容易符合预期；
+    \item 当$\mu\to\infty$时，求得的步长$\bm{\delta}$接近于最速下降方向$-\frac{1}{\mu}\mathrm{J}^\top\mathbf{f}(\bm{x})$，当当前的变量$\bm{x}$ 的值距离最优解较远时，最速下降的方向更容易符合预期；
     \item 当$\mu\to0$时，则求得的步长$\bm{\delta}$更接近于高斯-牛顿法的结果，如果当前变量$\bm{x}$的值较为接近最优解，则这样的步长更容易符合预期，因为在收敛点附近，真实的海森矩阵更接近标准的二次型形式。
 \end{enumerate}
 同时，由于正则项$\mu\mathrm{I}$的加入，修改后的海森矩阵$(\mathrm{J}^\top\mathrm{J}+\mu\mathrm{I})$一定为正定二次型矩阵，提升了求解的数值稳定性。
@@ -155,21 +155,37 @@
 
 \subsubsection*{狗腿法}
 
-狗腿法（Dog-Leg，DL）是另一个经典的求解非线性最小二乘优化的算法，也是信赖域方法的代表。莱文贝格-马夸特方法通过阻尼因子来间接地控制每一次迭代的步长，而狗腿法则显式地使用了信赖域来约束每一次迭代的步长。下面给出传统的使用狗腿法求解问题\eqref{eq:nlls}的步骤\citep{tingleff2004methods}。首先按照常规的求解步骤进行线性化，得到线性最小二乘子问题\eqref{eq:lls}。狗腿法首先使用高斯-牛顿法求解一个二阶迭代步
+狗腿法（Dog-Leg，DL）是另一个经典的求解非线性最小二乘优化的算法，也是信赖域方法的代表。莱文贝格-马夸特方法通过阻尼因子来间接地控制每一次迭代的步长，而狗腿法则显式地使用了信赖域来约束每一次迭代的步长。下面给出传统的使用狗腿法求解问题\eqref{eq:nlls}的步骤\citep{tingleff2004methods}。首先按照常规的求解步骤进行线性化，得到线性最小二乘子问题\eqref{eq:lls}。狗腿法首先使用高斯-牛顿法求解二阶迭代步
 \begin{equation}
     \bm{\delta}_{gn} =
         -\left( \mathrm{J}^\top\mathrm{J} \right)
         \enspace\setminus\enspace
         \left( \mathrm{J}^\top \mathbf{f}_0 \right)
 \end{equation}
-然后使用最速下降法求解一个一阶的迭代步
+然后使用最速下降法求解一阶迭代步
 \begin{equation}
     \bm{\delta}_{sd} =
-        \frac{\lVert\bm{g}\rVert^2}{\lVert\mathrm{J}\bm{g}\rVert^2}
+        -\frac{\lVert\bm{g}\rVert^2}{\lVert\mathrm{J}\bm{g}\rVert^2}
         \left( \mathrm{J}^\top \mathbf{f}_0 \right)
 \end{equation}
 
-狗腿法根据当前的信赖域半径$\Delta$和以上求解的两个步长来计算综合的迭代步$\bm{\delta}_{dl}$，当$\Delta$较大时，狗腿法倾向于选择高斯-牛顿法的迭代步$\bm{\delta}_{gn}$；当$\Delta$较小时则倾向于选择最速下降法的迭代步$\bm{\Delta}_{sd}$。
+和莱文贝格-马夸特法类似，狗腿法也是一种结合了高斯-牛顿法和最速下降法的方法，根据当前的信赖域半径$\Delta$和以上求解的两个步长来计算综合的迭代步$\bm{\delta}_{dl}$。当$\Delta$较大时，狗腿法的迭代步更接近于高斯-牛顿法的迭代步$\bm{\delta}_{gn}$；当$\Delta$较小时则更接近于最速下降法的迭代步$\bm{\Delta}_{sd}$。算法\ref{alg:dogleg}详细描述了狗腿法的迭代过程。
+
+\begin{algorithm}
+\caption{狗腿法}
+\begin{algorithmic}[1]
+    \algsetup{linenodelimiter=\ }
+    \STATE $\Delta \coloneqq \Delta_0, \bm{x} \coloneqq \bm{x}_0$}
+    \FOR{$k = 0$ \TO $k_{max}$}
+        \STATE $k \coloneqq k+1$
+        \STATE 构建正规方程：
+               $\mathrm{J}(\bm{x})^\top \mathrm{J}(\bm{x}) \bm{\delta} =
+                \mathrm{J}(\bm{x})^\top \mathbf{f}(\bm{x})$
+                \STATE 计算高斯牛顿迭代步：$\bm{\delta}_{gn} = $
+    \ENDWHILE
+\end{algorithmic}
+\label{alg:dogleg}
+\end{algorithm}
 
 \subsection{鲁棒估计方法}
 
