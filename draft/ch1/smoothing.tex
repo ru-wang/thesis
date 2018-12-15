@@ -161,12 +161,14 @@
         -\left( \mathrm{J}^\top\mathrm{J} \right)
         \enspace\setminus\enspace
         \left( \mathrm{J}^\top \mathbf{f}_0 \right)
+    \label{eq:gn}
 \end{equation}
 然后使用最速下降法求解一阶迭代步
 \begin{equation}
     \bm{\delta}_{sd} =
         -\frac{\lVert\bm{g}\rVert^2}{\lVert\mathrm{J}\bm{g}\rVert^2}
         \left( \mathrm{J}^\top \mathbf{f}_0 \right)
+    \label{eq:sd}
 \end{equation}
 
 和莱文贝格-马夸特法类似，狗腿法也是一种结合了高斯-牛顿法和最速下降法的方法，根据当前的信赖域半径$\Delta$和以上求解的两个步长来计算综合的迭代步$\bm{\delta}_{dl}$。当$\Delta$较大时，狗腿法的迭代步更接近于高斯-牛顿法的迭代步$\bm{\delta}_{gn}$；当$\Delta$较小时则更接近于最速下降法的迭代步$\bm{\Delta}_{sd}$。算法\ref{alg:dogleg}详细描述了狗腿法的迭代过程。
@@ -175,14 +177,34 @@
 \caption{狗腿法}
 \begin{algorithmic}[1]
     \algsetup{linenodelimiter=\ }
-    \STATE $\Delta \coloneqq \Delta_0, \bm{x} \coloneqq \bm{x}_0$}
+    \STATE $\Delta \coloneqq \Delta_0, \bm{x} \coloneqq \bm{x}_0$
     \FOR{$k = 0$ \TO $k_{max}$}
         \STATE $k \coloneqq k+1$
-        \STATE 构建正规方程：
-               $\mathrm{J}(\bm{x})^\top \mathrm{J}(\bm{x}) \bm{\delta} =
-                \mathrm{J}(\bm{x})^\top \mathbf{f}(\bm{x})$
-                \STATE 计算高斯牛顿迭代步：$\bm{\delta}_{gn} = $
-    \ENDWHILE
+        \STATE 构建正规方程的信息矩阵$\mathrm{J}(\bm{x})^\top \mathrm{J}(\bm{x})$和右侧$\mathrm{J}(\bm{x})^\top \mathbf{f}(\bm{x})$
+        \STATE 使用式\eqref{eq:gn}计算高斯-牛顿迭代步$\bm{\delta}_{gn}$
+        \STATE 使用式\eqref{eq:sd}计算最速下降迭代步$\bm{\delta}_{sd}$
+        \STATE 计算狗腿法步长$\bm{\delta}_{dl}$
+
+        \STATE $\Delta\mathbf{f} \coloneqq
+                \mathbf{f}(\bm{x}+\bm{\delta}_{dl}) -
+                \mathbf{f}(\bm{x})$
+
+        \STATE 计算迭代步质量$e$
+        \IF{$e > \epsilon_0$}
+            \STATE $\bm{x} \coloneqq \bm{x} + \bm{\delta}_{dl}$
+        \ENDIF
+
+        \IF
+        {
+            ($\lVert\bm{\delta}_{dl}\rVert < \epsilon_1$) \OR
+            ($\lVert\Delta\mathbf{f}\rVert < \epsilon_3$) \OR
+            ($\Delta < \epsilon_1$)
+        }
+            \STATE 结束优化
+        \ENDIF
+
+        \STATE 调整信赖域半径$\Delta$
+    \ENDFOR
 \end{algorithmic}
 \label{alg:dogleg}
 \end{algorithm}
