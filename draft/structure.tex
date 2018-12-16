@@ -21,10 +21,18 @@
 %----------------------------------------------------------------------------------------
 
 \usepackage[no-math]{xeCJK}
-\usepackage[includeheadfoot,left=3cm,right=2.5cm,top=3cm,bottom=2cm]{geometry}
-%\usepackage[includeheadfoot,left=1.5cm,right=1.5cm,top=2cm,bottom=1cm]{geometry}
+
+\usepackage[
+top=51pt,bottom=51pt,left=68pt,right=57pt,
+headsep=14pt,footskip=26pt,
+includehead, includefoot
+]{geometry}
+
+\topsep 0.7 true cm
+\parskip 0.5ex plus 0.25ex minus 0.25ex
+
 \usepackage{amsmath,amssymb,blkarray,bm,mathtools,nicefrac}
-\usepackage{algorithm,algorithmic,multicol,enumitem,indentfirst,tabularx}
+\usepackage{algorithm,algorithmic,multicol,enumitem,indentfirst,tabularx,titlesec}
 \usepackage[font=small]{caption}
 \usepackage[square]{natbib}
 \usepackage[hidelinks]{hyperref}
@@ -40,6 +48,9 @@
 \renewcommand{\figurename}{图}
 \renewcommand{\tablename}{表}
 \renewcommand{\refname}{参考文献}
+
+\titleformat{\chapter}{\normalfont\LARGE\bfseries}{\thechapter}{1em}{}
+\titlespacing*{\chapter}{0pt}{3.5ex plus 1ex minus .2ex}{2.3ex plus .2ex}
 
 \floatname{algorithm}{算法}
 \renewcommand{\algorithmicrequire}{\textbf{输入：}}

@@ -23,26 +23,25 @@
     \mathcal{X}^\star &= \mathop{\arg\max}_{\mathcal{X}}
                          \prod_{f_i\in\mathcal{Z}} P(f_i(\mathcal{X}_i)) \\
                       &= \mathop{\arg\min}_{\mathcal{X}}
-                         \sum_{f_i\in\mathcal{Z}} \frac{1}{2}
+                         \sum_{f_i\in\mathcal{Z}} \tfrac{1}{2}
                          \lVert f_i(\mathcal{X}_i)) \rVert_{\sigma_i^2}^2
 \end{aligned}
 \end{equation}
 
 \subsection{非线性最小二乘}
 
-非线性最小二乘问题难以被直接求解，通常要使用迭代求解的方法来逼近局部最优解。如果变量的初值在全局最优解的附近，则一般可以使用牛顿法（Newton's method）迭代求解。如下给出了而一个典型的非线性最小二乘问题的形式：
+非线性最小二乘问题难以被直接求解，通常要使用迭代求解的方法来逼近局部最优解。如果变量的初值在全局最优解的附近，则一般可以使用牛顿法（Newton's method）迭代求解。如下给出了而一个典型的非线性最小二乘问题$F(\bm{x})$的形式：
 \begin{equation}
-\begin{aligned}
-    \bm{x}^\star &= \mathop{\arg\min}_{\bm{x}} F(\bm{x}) \\
-                 &= \mathop{\arg\min}_{\bm{x}}
-                    \frac{1}{2} \Vert \mathbf{f}(\bm{x}) \Vert^2
-\end{aligned}\label{eq:nlls}
+    F(\bm{x}) = \tfrac{1}{2} \Vert \bm{f}(\bm{x}) \Vert^2
+\label{eq:nls}
 \end{equation}
-其中变量$\bm{x}\in\mathbb{R}$，$\mathbf{f}(\cdot)$为关于变量$\bm{x}$的非线性函数，即目标函数。
-
-在局部最优解附近，最小化能量函数$F(\cdot)$等同于求解其梯度函数$\bm{g}(\cdot)$的零点（对于线性的函数则为唯一的零点），即：
+其中变量$\bm{x}\in\mathbb{R}^n$，$\bm{f}(\cdot)\in\mathbb{R}^m$为关于变量$\bm{x}$的非线性函数，即目标函数。在局部最优解附近，最小化能量函数$F(\cdot)$：
 \begin{equation}
-    \bm{g} \doteq \nabla F = \begin{bmatrix}
+    \bm{x}^\star = \mathop{\arg\min}_{\bm{x}} F(\bm{x}) 
+\end{equation}
+等同于求解其梯度函数$\bm{g}(\cdot)$的零点（对于线性的函数则为唯一的零点），即：
+\begin{equation}
+    \bm{g}(\bm{x}) \doteq \nabla F(\bm{x}) = \begin{bmatrix}
         \frac{\partial F}{\partial x_1} &
         \frac{\partial F}{\partial x_2} &
         \cdots &
@@ -52,7 +51,7 @@
 
 采用牛顿法求解上述零点问题，记梯度函数$\bm{g}(\cdot)$的一阶导数为海森矩阵（Hessian matrix）：
 \begin{equation}
-    \mathrm{H} \doteq \begin{bmatrix}
+    \mathrm{H}(\bm{x}) \doteq \begin{bmatrix}
         \frac{\partial^2 F}{\partial x_1^2} &
         \frac{\partial^2 F}{\partial x_1 \partial x_2} &
         \cdots & \cdots &
@@ -74,40 +73,52 @@
 \end{equation}
 求解如下线性系统：
 \begin{equation}
-    \bm{x} = -\mathrm{H} \enspace\setminus\enspace \bm{g}
+    \bm{x} = -\mathrm{H}(\bm{x}) \enspace\setminus\enspace \bm{g}(\bm{x})
     \label{eq:linsys}
 \end{equation}
 
-线性的问题中，当矩阵$\mathrm{H}$为正定矩阵时, 给定任意初值$\bm{x}$（这里选择了初值为$\bm{0}$）只需一步就可解得式\eqref{eq:nlls}的全局最优解。而对于非线性的情况，则需要多次迭代才能解得局部最优解。
+线性的问题中，当矩阵$\mathrm{H}(\bm{x})$为正定矩阵时, 给定任意初值$\bm{x}$（这里选择了初值为$\bm{0}$）只需一步就可解得式\eqref{eq:nls}的全局最优解。而对于非线性的情况，则需要多次迭代才能解得局部最优解。
 
 \subsection{高斯-牛顿法}\label{sec:gn}
 
 对于非线性最小二乘问题，牛顿法中计算函数$F(\cdot)$的准确海森矩阵$\mathrm{H}$的代价往往很大，甚至没有闭解。一些算法会寻求使用近似方法计算每次迭代的海森矩阵，比如拟牛顿法\citep{tingleff2004methods}（Qausi-Newton method）。拟牛顿法适用于一般的最小化问题，而对于非线性最小二乘问题，通常可以高斯-牛顿法（Gauss-Newton method）求解。高斯-牛顿法是用于求解非线性最小二乘问题的经典迭代算法，也是众多其他迭代算法的基础。
 
-依然考虑非线性最小二乘问题\eqref{eq:nlls}，使用高斯-牛顿法迭代求解，首先要给定变量的初值$\bm{x}=\bm{x}_0$。对其在当前点处进行泰勒展开，并忽略高阶项，可得目标函数$\mathbf{f}(\cdot)$在$\bm{x}_0$处的线性近似：
+依然考虑非线性最小二乘问题\eqref{eq:nls}，使用高斯-牛顿法迭代求解，首先要给定变量的初值$\bm{x}=\bm{x}_0$。对其在当前点处进行泰勒展开，并忽略高阶项，可得目标函数$\bm{f}(\cdot)$在$\bm{x}$处的线性近似：
 \begin{equation}
-    \mathbf{f}(\bm{x}_0+\bm{\delta}) \simeq \mathbf{f}_0 + \mathrm{J}\bm{\delta}
+    \bm{f}(\bm{x}+\bm{\delta}) \simeq \bm{f}(\bm{x}) + \mathrm{J}\bm{\delta}
 \end{equation}
-其中$\mathrm{J}\in\mathbb{R}^{m \times n}$是目标函数$\mathbf{f}(\cdot)$在$\bm{x}_0$处的雅各比矩阵（Jacobian）。式\eqref{eq:nlls}被转化为局部$\bm{x}_0$处的线性最小二乘子问题
+其中$\mathrm{J}\in\mathbb{R}^{m \times n}$是目标函数$\bm{f}(\cdot)$在$\bm{x}$处的雅各比矩阵（Jacobian）。相应地，
 \begin{equation}
-    \bm{\delta}_{gn} =
-        \min_{\bm{\delta}} \frac{1}{2}
-        \Vert \mathbf{f}_0 + \mathrm{J}\bm{\delta} \Vert^2
+\begin{aligned}
+    F(\bm{x}+\bm{\delta}) \simeq L(\bm{\delta})
+        &= \tfrac{1}{2} \Vert \bm{f}(\bm{x}) + \mathrm{J}\bm{\delta} \Vert^2 \\
+        &= F(\bm{x}) + \mathrm{J}^\top\bm{f} +
+           \tfrac{1}{2}\bm{\delta}^\top\mathrm{J}^\top\mathrm{J}\bm{\delta}
+\end{aligned}
+\label{eq:linmod}
+\end{equation}
+式\eqref{eq:nls}被转化为局部$\bm{x}$处的线性最小二乘子问题，使用牛顿法求解这个线性最小二乘子问题
+\begin{equation}
+    \min_{\bm{\delta}} \tfrac{1}{2}
+    \Vert \bm{f}(\bm{x}) + \mathrm{J}\bm{\delta} \Vert^2
     \label{eq:lls}
 \end{equation}
-使用牛顿法求解这个线性最小二乘子问题，构建正规方程（normal equation）并求解，可得高斯-牛顿法一次迭代的结果：
+需要构建正规方程（normal equation）
 \begin{equation}
-    \bm{\delta}_{gn} =
-        -\left( \mathrm{J}^\top\mathrm{J} \right)
-        \enspace\setminus\enspace
-        \left( \mathrm{J}^\top\mathbf{f}_0 \right)
+    \mathrm{H}_{gn} = \mathrm{J}^\top\mathrm{J}, \quad
+    \bm{g}          = \mathrm{J}^\top\bm{f}(\bm{x})
     \label{eq:normal_eq}
 \end{equation}
-将此结果更新至变量：$\bm{x}\leftarrow\bm{x}_0+\bm{\delta}$，然后不断重复以上过程，直至结果收敛。
+再求解，得到高斯-牛顿法一次迭代的结果：
+\begin{equation}
+    \bm{\delta}_{gn} = -\mathrm{H}_{gn} \enspace\setminus\enspace \bm{g}
+    \label{eq:gn}
+\end{equation}
+将此结果更新至变量：$\bm{x}\leftarrow\bm{x}+\bm{\delta}$，然后不断重复以上过程，直至结果收敛。
 
-式\eqref{eq:normal_eq}和\eqref{eq:linsys}的形式类似，也可以认为高斯-牛顿法和牛顿法的最大区别就是高斯-牛顿法使用了$\mathrm{J}^\top\mathrm{J}$来近似海森矩阵$\mathrm{H}$。
+式\eqref{eq:normal_eq}和\eqref{eq:linsys}的形式类似，也可以认为高斯-牛顿法和牛顿法的最大区别就是高斯-牛顿法使用了$\mathrm{J}^\top\mathrm{J}$来近似海森矩阵。
 
-\subsection{信赖域方法}
+\subsection{信赖域和阻尼方法}
 
 除了高斯-牛顿法之外，还有一种经典的求解非线性最小二乘优化的算法：莱文贝格-马夸特（Levenberg-Marquardt，LM）法。它也被认为是带有阻尼因子的高斯-牛顿法，也是信赖域方法（trust region method）的前身\citep{jorge2006numerical}。
 
@@ -117,19 +128,19 @@
 
 针对这一情况，莱文贝格在基础的高斯-牛顿法中引入了对迭代步长的直接约束，将原先每次迭代的线性最小二乘子问题改写为：
 \begin{equation}
-    \bm{\delta}_{l} =
-        \mathop{\min}_{\bm{\delta}} \frac{1}{2}
-        \left(
-            \Vert \mathbf{f}_0 + \mathrm{J}\bm{\delta} \Vert^2 +
-            \mu \Vert \bm{\delta} \Vert^2
-        \right), \quad \mu > 0
+    \mathop{\min}_{\bm{\delta}} \tfrac{1}{2}
+    \left(
+        \Vert \bm{f}(\bm{x}) + \mathrm{J}\bm{\delta} \Vert^2 +
+        \mu \Vert \bm{\delta} \Vert^2
+    \right), \quad \mu > 0
 \end{equation}
 这样一来，原先高斯-牛顿法求解的正规方程就变成了
 \begin{equation}
-    \bm{\delta}_l =
-        -\left( \mathrm{J}^\top\mathrm{J}+\mu\mathrm{I} \right)
-        \enspace\setminus\enspace
-        \left( \mathrm{J}^\top\mathbf{f}_0 \right)
+    \mathrm{H}_{l} = \left( \mathrm{J}^\top\mathrm{J}+\mu\mathrm{I} \right), \quad
+    \bm{g}         = \mathrm{J}^\top\bm{f}(\bm{x}) \\
+\end{equation}
+\begin{equation}
+    \bm{\delta}_{l} = -\mathrm{H}_{l} \enspace\setminus\enspace \bm{g}
     \label{eq:levenberg}
 \end{equation}
 其中的$\mu$就是所谓的阻尼因子（damping factor）。
@@ -137,7 +148,7 @@
 阻尼因子控制住了每次迭代计算的步长的模。通常阻尼因子$\mu$具备下面三个性质\citep{tingleff2004methods}：
 \begin{enumerate}
     \item 对于任意的$\mu>0$，海森矩阵$(\mathrm{J}^\top\mathrm{J}+\mu\mathrm{I})$正定，这一点保证了求得的步长$\bm{\delta}$处于能量下降的方向；
-    \item 当$\mu\to\infty$时，求得的步长$\bm{\delta}$接近于最速下降方向$-\frac{1}{\mu}\mathrm{J}^\top\mathbf{f}(\bm{x})$，当当前的变量$\bm{x}$ 的值距离最优解较远时，最速下降的方向更容易符合预期；
+    \item 当$\mu\to\infty$时，求得的步长$\bm{\delta}$接近于最速下降方向$-\frac{1}{\mu}\mathrm{J}^\top\bm{f}(\bm{x})$，当当前的变量$\bm{x}$ 的值距离最优解较远时，最速下降的方向更容易符合预期；
     \item 当$\mu\to0$时，则求得的步长$\bm{\delta}$更接近于高斯-牛顿法的结果，如果当前变量$\bm{x}$的值较为接近最优解，则这样的步长更容易符合预期，因为在收敛点附近，真实的海森矩阵更接近标准的二次型形式。
 \end{enumerate}
 同时，由于正则项$\mu\mathrm{I}$的加入，修改后的海森矩阵$(\mathrm{J}^\top\mathrm{J}+\mu\mathrm{I})$一定为正定二次型矩阵，提升了求解的数值稳定性。
@@ -146,32 +157,24 @@
 
 莱文贝格在海森矩阵的每一个主元上都施加了同样的阻尼限制$\mu$，某种程度上将是对步长$\bm{\delta}$在各个梯度方向上施加了相同的限制，这显然不是最合理的做法。当$\mu$非常大的时候，一定程度上由原始海森矩阵$\mathrm{J}^\top\mathrm{J}$提供的信息就被抑制了，难以被利用。马夸特在莱文贝格的方法上进行了改进，根据海森矩阵的主元大小，对步长的不同梯度方向施加不同的阻尼：
 \begin{equation}
-    \bm{\delta}_{lm} =
-        -\left( \mathrm{J}^\top\mathrm{J}+\mu\mathbf{diag}(\mathrm{J}^\top\mathrm{J}) \right)
-        \enspace\setminus\enspace
-        \left( \mathrm{J}^\top \mathbf{f}_0 \right)
+    \mathrm{H} = \left( \mathrm{J}^\top\mathrm{J}+\mu\mathbf{diag}(\mathrm{J}^\top\mathrm{J}) \right), \quad
+    \bm{g}     = \mathrm{J}^\top\bm{f}(\bm{x}) \\
+\end{equation}
+\begin{equation}
+    \bm{\delta}_{lm} = -\mathrm{H} \enspace\setminus\enspace \bm{g}
+    \label{eq:lm}
 \end{equation}
 这样一来，在梯度较小的方向阻尼较小，$\bm{\delta}_{lm}$的分量也就较大，反之则阻尼较大，$\bm{\delta}_{lm}$的分量较小。得益于更合理的阻尼设置，相对于单纯的莱文贝格法，莱文贝格-马夸特方法在实际应用中的收敛效率要更好。
 
 \subsubsection*{狗腿法}
 
-狗腿法（Dog-Leg，DL）是另一个经典的求解非线性最小二乘优化的算法，也是信赖域方法的代表。莱文贝格-马夸特方法通过阻尼因子来间接地控制每一次迭代的步长，而狗腿法则显式地使用了信赖域来约束每一次迭代的步长。下面给出传统的使用狗腿法求解问题\eqref{eq:nlls}的步骤\citep{tingleff2004methods}。首先按照常规的求解步骤进行线性化，得到线性最小二乘子问题\eqref{eq:lls}。狗腿法首先使用高斯-牛顿法求解二阶迭代步
+狗腿法（Dog-Leg，DL）是另一个经典的求解非线性最小二乘优化的算法，也是信赖域方法的代表。莱文贝格-马夸特方法通过阻尼因子来间接地控制每一次迭代的步长，而狗腿法则显式地使用了信赖域来约束每一次迭代的步长。下面给出传统的使用狗腿法求解问题\eqref{eq:nls}的步骤\citep{tingleff2004methods}。首先按照常规的求解步骤进行线性化，得到线性最小二乘子问题\eqref{eq:lls}。狗腿法首先使用式\eqref{eq:gn}求解高斯-牛顿迭代步$\bm{\delta}_{gn}$，然后使用最速下降法求解一阶迭代步：
 \begin{equation}
-    \bm{\delta}_{gn} =
-        -\left( \mathrm{J}^\top\mathrm{J} \right)
-        \enspace\setminus\enspace
-        \left( \mathrm{J}^\top \mathbf{f}_0 \right)
-    \label{eq:gn}
-\end{equation}
-然后使用最速下降法求解一阶迭代步
-\begin{equation}
-    \bm{\delta}_{sd} =
-        -\frac{\lVert\bm{g}\rVert^2}{\lVert\mathrm{J}\bm{g}\rVert^2}
-        \left( \mathrm{J}^\top \mathbf{f}_0 \right)
+    \bm{\delta}_{sd} = -\frac{\lVert\bm{g}\rVert^2}{\lVert\mathrm{J}\bm{g}\rVert^2} \bm{g}
     \label{eq:sd}
 \end{equation}
 
-和莱文贝格-马夸特法类似，狗腿法也是一种结合了高斯-牛顿法和最速下降法的方法，根据当前的信赖域半径$\Delta$和以上求解的两个步长来计算综合的迭代步$\bm{\delta}_{dl}$。当$\Delta$较大时，狗腿法的迭代步更接近于高斯-牛顿法的迭代步$\bm{\delta}_{gn}$；当$\Delta$较小时则更接近于最速下降法的迭代步$\bm{\Delta}_{sd}$。算法\ref{alg:dogleg}详细描述了狗腿法的迭代过程。
+和莱文贝格-马夸特法类似，狗腿法也是一种结合了高斯-牛顿法和最速下降法的方法，根据当前的信赖域半径$\Delta$和以上求解的两个步长来计算综合的迭代步$\bm{\delta}_{dl}$。当$\Delta$较大时，狗腿法的迭代步更接近于高斯-牛顿法的迭代步$\bm{\delta}_{gn}$；当$\Delta$较小时则更接近于最速下降法的迭代步$\bm{\delta}_{sd}$。算法\ref{alg:dogleg}详细描述了狗腿法的迭代过程。
 
 \begin{algorithm}
 \caption{狗腿法}
@@ -180,30 +183,34 @@
     \STATE $\Delta \coloneqq \Delta_0, \bm{x} \coloneqq \bm{x}_0$
     \FOR{$k = 0$ \TO $k_{max}$}
         \STATE $k \coloneqq k+1$
-        \STATE 构建正规方程的信息矩阵$\mathrm{J}(\bm{x})^\top \mathrm{J}(\bm{x})$和右侧$\mathrm{J}(\bm{x})^\top \mathbf{f}(\bm{x})$
+        \STATE 使用式\eqref{eq:lls}计算线性化子问题
         \STATE 使用式\eqref{eq:gn}计算高斯-牛顿迭代步$\bm{\delta}_{gn}$
         \STATE 使用式\eqref{eq:sd}计算最速下降迭代步$\bm{\delta}_{sd}$
         \STATE 计算狗腿法步长$\bm{\delta}_{dl}$
 
-        \STATE $\Delta\mathbf{f} \coloneqq
-                \mathbf{f}(\bm{x}+\bm{\delta}_{dl}) -
-                \mathbf{f}(\bm{x})$
-
-        \STATE 计算迭代步质量$e$
-        \IF{$e > \epsilon_0$}
-            \STATE $\bm{x} \coloneqq \bm{x} + \bm{\delta}_{dl}$
-        \ENDIF
-
-        \IF
-        {
-            ($\lVert\bm{\delta}_{dl}\rVert < \epsilon_1$) \OR
-            ($\lVert\Delta\mathbf{f}\rVert < \epsilon_3$) \OR
-            ($\Delta < \epsilon_1$)
-        }
+        \IF{\{步长$\bm{\delta}_{dl}$收敛\}}
             \STATE 结束优化
         \ENDIF
 
-        \STATE 调整信赖域半径$\Delta$
+        \STATE 计算迭代步质量$\rho$
+        \[
+            \rho = \frac {F(\bm{x})-F(\bm{x}+\bm{\delta}_{dl})}
+                         {L(\bm{0})-L(\bm{\delta}_{dl})}
+        \]
+
+        \IF{\{$\rho > 0.0$\}}
+            \STATE $\bm{x} \coloneqq \bm{x} + \bm{\delta}_{dl}$
+        \ENDIF
+
+        \IF{\{$\rho > \epsilon_0$\}}
+            \STATE $\Delta \coloneqq \text{fmax}\{\Delta,3\lVert\bm{\delta}_{dl}\rVert\}$
+        \ELSIF{\{$\rho < \epsilon_1$\}}
+            \STATE $\Delta \coloneqq \Delta/2$
+        \ENDIF
+
+        \IF{\{信赖域$\Delta$收敛\}}
+            \STATE 结束优化
+        \ENDIF
     \ENDFOR
 \end{algorithmic}
 \label{alg:dogleg}
@@ -213,24 +220,22 @@
 
 For least squares problems where the minimization may encounter input terms that contain outliers, that is, completely bogus measurements, it is important to use a robust function that reduces their influence\citep{ceres-solver}.
 
-An unconstrained robustified nonlinear least squares (RNLLS) problem modifies the basic NLLS \eqref{eq:nlls}
-
-\begin{equation}\label{eq:rnlls}
-\begin{aligned}
-    \bm{x}^\star &= \mathop{\arg\min}_{\bm{x}} G(\bm{x}) \\
-                 &= \mathop{\arg\min}_{\bm{x}}
-                    \frac{1}{2} \rho
-                    \left( \lVert \mathbf{f}(\bm{x}) \rVert^2 \right)
-\end{aligned}
-\end{equation}
-
-where the scalar function $\rho(\cdot)$ reweights the normal equation. Like solving the NLLS problems, we solve the RNLLS by finding the zero of the robustified gradient
+An unconstrained robustified nonlinear least squares (RNLS) problem modifies the basic NLS \eqref{eq:nls}
 
 \begin{equation}
-    \bm{g} \doteq \nabla G = \rho' \mathrm{J}^\top \mathbf{f}(\bm{x})
+     \mathop{\arg\min}_{\bm{x}} G(\bm{x}) =
+     \mathop{\arg\min}_{\bm{x}} \tfrac{1}{2} \rho
+        \left( \lVert \bm{f}(\bm{x}) \rVert^2 \right)
+\label{eq:rnls}
 \end{equation}
 
-Note that $\rho'(\cdot)$ is also function of $\bm{x}$ (the dependence of $\mathrm{J}$ on $\bm{x}$ is ignored since $\mathbf{f}(\cdot)$ is assumed to be linear at current iteration $\mathbf{f}(\bm{x} + \bm{\delta}) \simeq \mathbf{f}(\bm{x}) + \mathrm{J}\bm{\delta}$), so the Hessian of $\bm{g}$ is
+where the scalar function $\rho(\cdot)$ reweights the normal equation. Like solving the NLS problems, we solve the RNLS by finding the zero of the robustified gradient
+
+\begin{equation}
+    \bm{g} \doteq \nabla G = \rho' \mathrm{J}^\top \bm{f}(\bm{x})
+\end{equation}
+
+Note that $\rho'(\cdot)$ is also function of $\bm{x}$ (the dependence of $\mathrm{J}$ on $\bm{x}$ is ignored since $\bm{f}(\cdot)$ is assumed to be linear at current iteration $\bm{f}(\bm{x} + \bm{\delta}) \simeq \bm{f}(\bm{x}) + \mathrm{J}\bm{\delta}$), so the Hessian of $\bm{g}$ is
 
 \begin{equation}
 \begin{aligned}
@@ -238,23 +243,23 @@ Note that $\rho'(\cdot)$ is also function of $\bm{x}$ (the dependence of $\mathr
            &=
               \rho' \mathrm{J}^\top \mathrm{J} +
               \frac{\partial\rho'(\bm{x})}{\partial\bm{x}}
-              \mathbf{f}^\top(\bm{x})\mathrm{J} \\
+              \bm{f}^\top(\bm{x})\mathrm{J} \\
            &=
               \rho' \mathrm{J}^\top \mathrm{J} +
-              \frac{\partial\rho'}{\partial\lVert\mathbf{f}(\bm{x})\rVert^2}
-              \frac{\partial\lVert\mathbf{f}(\bm{x})\rVert^2}{\partial\bm{x}}
-              \mathbf{f}^\top(\bm{x}) \mathrm{J} \\
+              \frac{\partial\rho'}{\partial\lVert\bm{f}(\bm{x})\rVert^2}
+              \frac{\partial\lVert\bm{f}(\bm{x})\rVert^2}{\partial\bm{x}}
+              \bm{f}^\top(\bm{x}) \mathrm{J} \\
            &=
               \rho' \mathrm{J}^\top \mathrm{J} + \rho''
-              \frac{\partial\lVert\mathbf{f}(\bm{x})\rVert^2}{\partial\bm{x}}
-              \mathbf{f}^\top(\bm{x}) \mathrm{J} \\
+              \frac{\partial\lVert\bm{f}(\bm{x})\rVert^2}{\partial\bm{x}}
+              \bm{f}^\top(\bm{x}) \mathrm{J} \\
            &\simeq
               \rho' \mathrm{J}^\top \mathrm{J} + 2\rho''
-              \mathrm{J}^\top \mathbf{f}(\bm{x}) \mathbf{f}^\top(\bm{x}) \mathrm{J} \\
+              \mathrm{J}^\top \bm{f}(\bm{x}) \bm{f}^\top(\bm{x}) \mathrm{J} \\
            &=
               \mathrm{J}^\top \left(
                   \rho'\mathrm{I} + 2\rho''
-                  \mathbf{f}(\bm{x}) \mathbf{f}^\top(\bm{x})
+                  \bm{f}(\bm{x}) \bm{f}^\top(\bm{x})
               \right) \mathrm{J}
 \end{aligned}
 \end{equation}
@@ -264,8 +269,8 @@ The robustified normal equation is given by
 \begin{equation}
     \mathrm{J}^\top \left(
         \rho'\mathrm{I} + 2\rho''
-        \mathbf{f}(\bm{x}) \mathbf{f}^\top(\bm{x})
+        \bm{f}(\bm{x}) \bm{f}^\top(\bm{x})
     \right) \mathrm{J} \bm{\delta}
     =
-    -\rho' \mathrm{J}^\top \mathbf{f}(\bm{x})
+    -\rho' \mathrm{J}^\top \bm{f}(\bm{x})
 \end{equation}
