@@ -193,19 +193,19 @@
             \STATE 结束优化
         \ENDIF
 
-        \STATE 计算迭代步质量$\rho$：
+        \STATE 计算迭代步质量$\varrho$：
         \[
-            \rho = \frac {F(\bm{x})-F(\bm{x}+\bm{\delta}_{dl})}
-                         {L(\bm{0})-L(\bm{\delta}_{dl})}
+            \varrho = \frac {F(\bm{x})-F(\bm{x}+\bm{\delta}_{dl})}
+                            {L(\bm{0})-L(\bm{\delta}_{dl})}
         \]
 
-        \IF{\{$\rho > 0.0$\}}
+        \IF{\{$\varrho > 0.0$\}}
             \STATE $\bm{x} \coloneqq \bm{x} + \bm{\delta}_{dl}$
         \ENDIF
 
-        \IF{\{$\rho > \epsilon_0$\}}
+        \IF{\{$\varrho > \epsilon_0$\}}
             \STATE $\Delta \coloneqq \text{fmax}\{\Delta,3\lVert\bm{\delta}_{dl}\rVert\}$
-        \ELSIF{\{$\rho < \epsilon_1$\}}
+        \ELSIF{\{$\varrho < \epsilon_1$\}}
             \STATE $\Delta \coloneqq \Delta/2$
         \ENDIF
 
@@ -219,53 +219,48 @@
 
 \subsection{鲁棒估计方法}
 
-最小二乘非常容易受数据中的外点（outliers）影响。也就是说，基于非线性最小二乘的因子图优化对于问题中的错误约束非常敏感。考虑一般的视觉里程计，一种常见的产生错误约束的情况就是问题中特征误匹配带来的错误视觉观测约束。错误的约束通常对应着更大的目标函数，为了降低错误约束的影响，通常要引入鲁棒估计的方法（robust estimation）来进一步限制问题。一个带有鲁棒项的最小二乘优化问题（robustified nonlinear least squares）将基本的非线性最小二乘问题\eqref{eq:nls}修改为了如下形式：
+最小二乘非常容易受数据中的外点（outliers）影响。也就是说，基于非线性最小二乘的因子图优化对于问题中的错误约束非常敏感。考虑一般的视觉里程计，一种常见的产生错误约束的情况就是问题中特征误匹配带来的错误视觉观测约束。错误的约束通常对应着更大的目标函数，为了降低错误约束的影响，通常要引入鲁棒估计的方法（robust estimation）来进一步限制问题。一个带有鲁棒项的非线性最小二乘优化问题（robustified nonlinear least squares）将基本的非线性最小二乘问题\eqref{eq:nls}修改为了如下形式：
 \begin{equation}
     R(\bm{x}) = \tfrac{1}{2} \rho(F(\bm{x}))
               = \tfrac{1}{2} \rho \left( \lVert \bm{f}(\bm{x}) \rVert^2 \right)
 \label{eq:rnls}
 \end{equation}
-其中函数$\rho(\cdot):\mathbb{R}\mapsto\mathbb{R}$为鲁棒函数（robust function），通常为高度非线性。
+其中标量函数$\rho(\cdot):\mathbb{R}\mapsto\mathbb{R}$为鲁棒函数（robust function），通常为高度非线性。
 
-The scalar function $\rho(\cdot)$ reweights the normal equation. Like solving the NLS problems, we solve the RNLS by finding the zero of the robustified gradient
+由于鲁棒函数$\rho(\cdot)$给原先非线性最小二乘问题又引入了高度的非线性性质，为了保证计算的正确性，求解鲁棒非线性最小二乘问题的时候不能忽略$\rho(\cdot)$二阶导数\citep{triggs1999bundle}：
 \begin{equation}
-    \bm{g} = \nabla G = \rho' \mathrm{J}^\top \bm{f}(\bm{x})
+\begin{gathered}
+    \mathrm{H} = \mathrm{J}^\top
+                 \left(
+                     \rho'\mathrm{I} + 2\rho'' \bm{f}(\bm{x}) \bm{f}^\top(\bm{x})
+                 \right)
+                 \mathrm{J} \\
+    \bm{g}(\bm{x}) = \rho' \mathrm{J}^\top \bm{f}(\bm{x})
+\end{gathered}
+\label{eq:rnormal_eq}
 \end{equation}
 
-Note that $\rho'(\cdot)$ is also function of $\bm{x}$ (the dependence of $\mathrm{J}$ on $\bm{x}$ is ignored since $\bm{f}(\cdot)$ is assumed to be linear at current iteration $\bm{f}(\bm{x} + \bm{\delta}) \simeq \bm{f}(\bm{x}) + \mathrm{J}\bm{\delta}$), so the Hessian of $\bm{g}$ is
+可见，鲁棒函数$\rho(\cdot)$会根据每一个目标函数的模其对正规方程的贡献权重，而且随着优化的进行，这个权重会在每一轮迭代中动态地调整。为了达到合理降低外点权重的目标，需要合理选择鲁棒函数形式。由式\eqref{eq:rnormal_eq}可见，鲁棒函数的选择尽可能地要满足如下几个条件\citep{zhang1995parameter}：
+\begin{enumerate}
+    \item $\rho(0)=0$
+    \item $\rho'(0)=1$
+    \item 当$\lVert\bm{f}(\bm{x})\rVert^2$的值处于外点区域时，
+          $\rho'(\lVert\bm{f}(\bm{x})\rVert^2)<1$
+    \item 当$\lVert\bm{f}(\bm{x})\rVert^2$的值处于外点区域时，
+          $\rho''(\lVert\bm{f}(\bm{x})\rVert^2)<0$
+\end{enumerate}
+其中前两点是为了保证鲁棒函数不对收敛的目标函数造成影响，后两点是为了保证鲁棒函数能有效地降低处于外点的目标函数的权重。常用的鲁棒函数有柯西函数（Cauchy's function）：
 \begin{equation}
-\begin{aligned}
-    \mathrm{H}
-           &=
-              \rho' \mathrm{J}^\top \mathrm{J} +
-              \frac{\partial\rho'(\bm{x})}{\partial\bm{x}}
-              \bm{f}^\top(\bm{x})\mathrm{J} \\
-           &=
-              \rho' \mathrm{J}^\top \mathrm{J} +
-              \frac{\partial\rho'}{\partial\lVert\bm{f}(\bm{x})\rVert^2}
-              \frac{\partial\lVert\bm{f}(\bm{x})\rVert^2}{\partial\bm{x}}
-              \bm{f}^\top(\bm{x}) \mathrm{J} \\
-           &=
-              \rho' \mathrm{J}^\top \mathrm{J} + \rho''
-              \frac{\partial\lVert\bm{f}(\bm{x})\rVert^2}{\partial\bm{x}}
-              \bm{f}^\top(\bm{x}) \mathrm{J} \\
-           &\simeq
-              \rho' \mathrm{J}^\top \mathrm{J} + 2\rho''
-              \mathrm{J}^\top \bm{f}(\bm{x}) \bm{f}^\top(\bm{x}) \mathrm{J} \\
-           &=
-              \mathrm{J}^\top \left(
-                  \rho'\mathrm{I} + 2\rho''
-                  \bm{f}(\bm{x}) \bm{f}^\top(\bm{x})
-              \right) \mathrm{J}
-\end{aligned}
+    \rho(s) = \ln(1+s)
+\end{equation}
+和休伯函数（Huber's function）：
+\begin{equation}
+    \rho(s) =
+    \left\{
+    \begin{array}{ll}
+        s & s \leq 1 \\
+        2\sqrt{s}-1 & s \geq 1
+    \end{array}
+    \right.
 \end{equation}
 
-The robustified normal equation is given by
-\begin{equation}
-    \mathrm{J}^\top \left(
-        \rho'\mathrm{I} + 2\rho''
-        \bm{f}(\bm{x}) \bm{f}^\top(\bm{x})
-    \right) \mathrm{J} \bm{\delta}
-    =
-    -\rho' \mathrm{J}^\top \bm{f}(\bm{x})
-\end{equation}
