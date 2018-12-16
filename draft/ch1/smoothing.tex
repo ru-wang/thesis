@@ -1,6 +1,6 @@
 \section{基于优化方法的状态估计}
 
-目前绝大多数的SLAM算法通过集束优化\citep{triggs1999bundle}（Bundle Adjustment，BA）方法来对状态进行估计在传统的视觉SfM算法中，集束优化是指通过联合优化所有的视觉观测误差来同时求解最优的相机位姿状态和三维点状态的方法。而对于使用了更多传感器的SLAM系统，除了三维点和位姿状态，集束优化算法还需要实时地、持续对系统的其他状态比作出估计。对于视觉惯性SLAM，集束优化通常会通过联合优化所有的视觉观测和惯性观测来同时求解相机或IMU的位姿、速度以及IMU的bias状态。
+目前绝大多数的SLAM算法通过集束优化\citep{triggs1999bundle}（Bundle Adjustment）方法来对状态进行估计在传统的视觉SfM算法中，集束优化是指通过联合优化所有的视觉观测误差来同时求解最优的相机位姿状态和三维点状态的方法。而对于使用了更多传感器的SLAM系统，除了三维点和位姿状态，集束优化算法还需要实时地、持续对系统的其他状态比作出估计。对于视觉惯性SLAM，集束优化通常会通过联合优化所有的视觉观测和惯性观测来同时求解相机或IMU的位姿、速度以及IMU的bias状态。
 
 \subsection{基于图优化的状态估计}
 
@@ -17,7 +17,7 @@
 \begin{equation}
     P(\mathcal{Z}|\mathcal{X}) = \prod_{f_i\in\mathcal{Z}} P(f_i(\mathcal{X}_i))
 \end{equation}
-其中$\mathcal{X}_i$代表所有与约束节点$f_i$相邻的状态节点。通常会假设这是一个高度非线性系统，并且所有的约束$f_i$的噪声服从高斯分布$f_i\sim\mathcal{N}(\mu_i, \sigma_i^2)$。这样的的概率最大化问题通常被转化为非线性最小二乘（Non-linear Least Squares，NLS）问题来求解：
+其中$\mathcal{X}_i$代表所有与约束节点$f_i$相邻的状态节点。通常会假设这是一个高度非线性系统，并且所有的约束$f_i$的噪声服从高斯分布$f_i\sim\mathcal{N}(\mu_i, \sigma_i^2)$。这样的的概率最大化问题通常被转化为非线性最小二乘（nonlinear least squares）问题来求解：
 \begin{equation}
 \begin{aligned}
     \mathcal{X}^\star &= \mathop{\arg\max}_{\mathcal{X}}
@@ -35,13 +35,13 @@
     F(\bm{x}) = \tfrac{1}{2} \Vert \bm{f}(\bm{x}) \Vert^2
 \label{eq:nls}
 \end{equation}
-其中变量$\bm{x}\in\mathbb{R}^n$，$\bm{f}(\cdot)\in\mathbb{R}^m$为关于变量$\bm{x}$的非线性函数，即目标函数。在局部最优解附近，最小化能量函数$F(\cdot)$：
+其中变量$\bm{x}\in\mathbb{R}^n$，$\bm{f}(\cdot):\mathbb{R}^n\mapsto\mathbb{R}^m$为关于变量$\bm{x}$的非线性代价函数，即目标函数。在局部最优解附近，最小化能量函数$F(\cdot)$：
 \begin{equation}
-    \bm{x}^\star = \mathop{\arg\min}_{\bm{x}} F(\bm{x}) 
+    \bm{x}^\star = \mathop{\arg\min}_{\bm{x}} F(\bm{x})
 \end{equation}
 等同于求解其梯度函数$\bm{g}(\cdot)$的零点（对于线性的函数则为唯一的零点），即：
 \begin{equation}
-    \bm{g}(\bm{x}) \doteq \nabla F(\bm{x}) = \begin{bmatrix}
+    \bm{g}(\bm{x}) = \nabla F(\bm{x}) = \begin{bmatrix}
         \frac{\partial F}{\partial x_1} &
         \frac{\partial F}{\partial x_2} &
         \cdots &
@@ -51,7 +51,7 @@
 
 采用牛顿法求解上述零点问题，记梯度函数$\bm{g}(\cdot)$的一阶导数为海森矩阵（Hessian matrix）：
 \begin{equation}
-    \mathrm{H}(\bm{x}) \doteq \begin{bmatrix}
+    \mathrm{H}(\bm{x}) = \begin{bmatrix}
         \frac{\partial^2 F}{\partial x_1^2} &
         \frac{\partial^2 F}{\partial x_1 \partial x_2} &
         \cdots & \cdots &
@@ -120,9 +120,9 @@
 
 \subsection{信赖域和阻尼方法}
 
-除了高斯-牛顿法之外，还有一种经典的求解非线性最小二乘优化的算法：莱文贝格-马夸特（Levenberg-Marquardt，LM）法。它也被认为是带有阻尼因子的高斯-牛顿法，也是信赖域方法（trust region method）的前身\citep{jorge2006numerical}。
+除了高斯-牛顿法之外，还有一种经典的求解非线性最小二乘优化的算法：莱文贝格-马夸特（Levenberg-Marquardt）法。它也被认为是带有阻尼因子的高斯-牛顿法，也是信赖域方法（trust region method）的前身\citep{jorge2006numerical}。
 
-众所周知，一般的VO算法中，尺度是不可观测的（unobservable）——在VO的状态估计中，对全局所有的三维点坐标和相机位置进行统一的缩放，不会引起重投影误差的改变（在不考虑数值误差的情况下）。从求解VO集束优化问题的角度来看，这一性质造成了在直接使用高斯-牛顿法时海森矩阵的秩亏现象，即矩阵$\mathrm{J}^\top\mathrm{J}$为半正定的情况。此时直接使用矩阵分解求逆的方法求解线性最小二乘子问题就会得到数值不稳定的结果，比如解得的步长在某个方向过大等。
+众所周知，一般的视觉里程计算法中，尺度是不可观测的（unobservable）——在视觉里程计的状态估计中，对全局所有的三维点坐标和相机位置进行统一的缩放，不会引起重投影误差的改变（在不考虑数值误差的情况下）。从求解视觉里程计集束优化问题的角度来看，这一性质造成了在直接使用高斯-牛顿法时海森矩阵的秩亏现象，即矩阵$\mathrm{J}^\top\mathrm{J}$为半正定的情况。此时直接使用矩阵分解求逆的方法求解线性最小二乘子问题就会得到数值不稳定的结果，比如解得的步长在某个方向过大等。
 
 \subsubsection*{莱文贝格方法}
 
@@ -168,15 +168,16 @@
 
 \subsubsection*{狗腿法}
 
-狗腿法（Dog-Leg，DL）是另一个经典的求解非线性最小二乘优化的算法，也是信赖域方法的代表。莱文贝格-马夸特方法通过阻尼因子来间接地控制每一次迭代的步长，而狗腿法则显式地使用了信赖域来约束每一次迭代的步长。下面给出传统的使用狗腿法求解问题\eqref{eq:nls}的步骤\citep{tingleff2004methods}。首先按照常规的求解步骤进行线性化，得到线性最小二乘子问题\eqref{eq:lls}。狗腿法首先使用式\eqref{eq:gn}求解高斯-牛顿迭代步$\bm{\delta}_{gn}$，然后使用最速下降法求解一阶迭代步：
+狗腿法（Dog-Leg）是另一个经典的求解非线性最小二乘优化的算法，也是信赖域方法的代表。莱文贝格-马夸特方法通过阻尼因子来间接地控制每一次迭代的步长，而狗腿法则显式地使用了信赖域来约束每一次迭代的步长。下面给出传统的使用狗腿法求解问题\eqref{eq:nls}的步骤\citep{tingleff2004methods}。首先按照常规的求解步骤进行线性化，得到线性最小二乘子问题\eqref{eq:lls}。狗腿法首先使用式\eqref{eq:gn}求解高斯-牛顿迭代步$\bm{\delta}_{gn}$，然后使用最速下降法求解一阶迭代步：
 \begin{equation}
-    \bm{\delta}_{sd} = -\frac{\lVert\bm{g}\rVert^2}{\lVert\mathrm{J}\bm{g}\rVert^2} \bm{g}
+    \bm{\delta}_{sd} = -\frac{\lVert\bm{g}\rVert^2}
+                             {\lVert\mathrm{J}\bm{g}\rVert^2} \bm{g}
     \label{eq:sd}
 \end{equation}
 
 和莱文贝格-马夸特法类似，狗腿法也是一种结合了高斯-牛顿法和最速下降法的方法，根据当前的信赖域半径$\Delta$和以上求解的两个步长来计算综合的迭代步$\bm{\delta}_{dl}$。当$\Delta$较大时，狗腿法的迭代步更接近于高斯-牛顿法的迭代步$\bm{\delta}_{gn}$；当$\Delta$较小时则更接近于最速下降法的迭代步$\bm{\delta}_{sd}$。算法\ref{alg:dogleg}详细描述了狗腿法的迭代过程。
 
-\begin{algorithm}
+\begin{algorithm}[htb!]
 \caption{狗腿法}
 \begin{algorithmic}[1]
     \algsetup{linenodelimiter=\ }
@@ -192,7 +193,7 @@
             \STATE 结束优化
         \ENDIF
 
-        \STATE 计算迭代步质量$\rho$
+        \STATE 计算迭代步质量$\rho$：
         \[
             \rho = \frac {F(\bm{x})-F(\bm{x}+\bm{\delta}_{dl})}
                          {L(\bm{0})-L(\bm{\delta}_{dl})}
@@ -218,25 +219,20 @@
 
 \subsection{鲁棒估计方法}
 
-For least squares problems where the minimization may encounter input terms that contain outliers, that is, completely bogus measurements, it is important to use a robust function that reduces their influence\citep{ceres-solver}.
-
-An unconstrained robustified nonlinear least squares (RNLS) problem modifies the basic NLS \eqref{eq:nls}
-
+最小二乘非常容易受数据中的外点（outliers）影响。也就是说，基于非线性最小二乘的因子图优化对于问题中的错误约束非常敏感。考虑一般的视觉里程计，一种常见的产生错误约束的情况就是问题中特征误匹配带来的错误视觉观测约束。错误的约束通常对应着更大的目标函数，为了降低错误约束的影响，通常要引入鲁棒估计的方法（robust estimation）来进一步限制问题。一个带有鲁棒项的最小二乘优化问题（robustified nonlinear least squares）将基本的非线性最小二乘问题\eqref{eq:nls}修改为了如下形式：
 \begin{equation}
-     \mathop{\arg\min}_{\bm{x}} G(\bm{x}) =
-     \mathop{\arg\min}_{\bm{x}} \tfrac{1}{2} \rho
-        \left( \lVert \bm{f}(\bm{x}) \rVert^2 \right)
+    R(\bm{x}) = \tfrac{1}{2} \rho(F(\bm{x}))
+              = \tfrac{1}{2} \rho \left( \lVert \bm{f}(\bm{x}) \rVert^2 \right)
 \label{eq:rnls}
 \end{equation}
+其中函数$\rho(\cdot):\mathbb{R}\mapsto\mathbb{R}$为鲁棒函数（robust function），通常为高度非线性。
 
-where the scalar function $\rho(\cdot)$ reweights the normal equation. Like solving the NLS problems, we solve the RNLS by finding the zero of the robustified gradient
-
+The scalar function $\rho(\cdot)$ reweights the normal equation. Like solving the NLS problems, we solve the RNLS by finding the zero of the robustified gradient
 \begin{equation}
-    \bm{g} \doteq \nabla G = \rho' \mathrm{J}^\top \bm{f}(\bm{x})
+    \bm{g} = \nabla G = \rho' \mathrm{J}^\top \bm{f}(\bm{x})
 \end{equation}
 
 Note that $\rho'(\cdot)$ is also function of $\bm{x}$ (the dependence of $\mathrm{J}$ on $\bm{x}$ is ignored since $\bm{f}(\cdot)$ is assumed to be linear at current iteration $\bm{f}(\bm{x} + \bm{\delta}) \simeq \bm{f}(\bm{x}) + \mathrm{J}\bm{\delta}$), so the Hessian of $\bm{g}$ is
-
 \begin{equation}
 \begin{aligned}
     \mathrm{H}
@@ -265,7 +261,6 @@ Note that $\rho'(\cdot)$ is also function of $\bm{x}$ (the dependence of $\mathr
 \end{equation}
 
 The robustified normal equation is given by
-
 \begin{equation}
     \mathrm{J}^\top \left(
         \rho'\mathrm{I} + 2\rho''
