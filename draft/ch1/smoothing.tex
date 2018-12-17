@@ -48,10 +48,9 @@
         \frac{\partial F}{\partial x_n}
     \end{bmatrix}^\top = \bm{0}
 \end{equation}
-
 采用牛顿法求解上述零点问题，记梯度函数$\bm{g}(\cdot)$的一阶导数为海森矩阵（Hessian matrix）：
 \begin{equation}
-    \mathrm{H}(\bm{x}) = \begin{bmatrix}
+    \mathrm{H} = \begin{bmatrix}
         \frac{\partial^2 F}{\partial x_1^2} &
         \frac{\partial^2 F}{\partial x_1 \partial x_2} &
         \cdots & \cdots &
@@ -73,11 +72,10 @@
 \end{equation}
 求解如下线性系统：
 \begin{equation}
-    \bm{x} = -\mathrm{H}(\bm{x}) \enspace\setminus\enspace \bm{g}(\bm{x})
+    \bm{\delta} = \mathrm{H} \enspace\setminus\enspace \bm{\eta}
     \label{eq:linsys}
 \end{equation}
-
-线性的问题中，当矩阵$\mathrm{H}(\bm{x})$为正定矩阵时, 给定任意初值$\bm{x}$（这里选择了初值为$\bm{0}$）只需一步就可解得式\eqref{eq:nls}的全局最优解。而对于非线性的情况，则需要多次迭代才能解得局部最优解。
+其中$\bm{\eta}=-\bm{g}(\bm{x})$。使用$\bm{\delta}$更新变量：$\bm{x}\leftarrow\bm{x}+\bm{\delta}$。式\eqref{eq:linsys}通常称为正规方程（normal equation），如上求解非线性最小二乘的方法则为正规方程法。线性的问题中，矩阵$\mathrm{H}(\bm{x})$至少为半正定矩阵, 给定任意初值$\bm{x}$（这里选择了初值为$\bm{0}$）只需一步就可解得式\eqref{eq:nls}的全局最优解。而对于非线性的情况，则需要多次迭代才能解得局部最优解。
 
 \subsection{高斯-牛顿法}\label{sec:gn}
 
@@ -103,15 +101,15 @@
     \Vert \bm{f}(\bm{x}) + \mathrm{J}\bm{\delta} \Vert^2
     \label{eq:lls}
 \end{equation}
-需要构建正规方程（normal equation）
+需要构建正规方程：
 \begin{equation}
     \mathrm{H}_{gn} = \mathrm{J}^\top\mathrm{J}, \quad
-    \bm{g}          = \mathrm{J}^\top\bm{f}(\bm{x})
+    \bm{\eta}       = -\mathrm{J}^\top\bm{f}(\bm{x})
     \label{eq:normal_eq}
 \end{equation}
 再求解，得到高斯-牛顿法一次迭代的结果：
 \begin{equation}
-    \bm{\delta}_{gn} = -\mathrm{H}_{gn} \enspace\setminus\enspace \bm{g}
+    \bm{\delta}_{gn} = \mathrm{H}_{gn} \enspace\setminus\enspace \bm{\eta}
     \label{eq:gn}
 \end{equation}
 将此结果更新至变量：$\bm{x}\leftarrow\bm{x}+\bm{\delta}$，然后不断重复以上过程，直至结果收敛。
@@ -137,10 +135,10 @@
 这样一来，原先高斯-牛顿法求解的正规方程就变成了
 \begin{equation}
     \mathrm{H}_{l} = \left( \mathrm{J}^\top\mathrm{J}+\mu\mathrm{I} \right), \quad
-    \bm{g}         = \mathrm{J}^\top\bm{f}(\bm{x}) \\
+    \bm{\eta}      = -\mathrm{J}^\top\bm{f}(\bm{x})
 \end{equation}
 \begin{equation}
-    \bm{\delta}_{l} = -\mathrm{H}_{l} \enspace\setminus\enspace \bm{g}
+    \bm{\delta}_{l} = \mathrm{H}_{l} \enspace\setminus\enspace \bm{\eta}
     \label{eq:levenberg}
 \end{equation}
 其中的$\mu$就是所谓的阻尼因子（damping factor）。
@@ -158,10 +156,10 @@
 莱文贝格在海森矩阵的每一个主元上都施加了同样的阻尼限制$\mu$，某种程度上将是对步长$\bm{\delta}$在各个梯度方向上施加了相同的限制，这显然不是最合理的做法。当$\mu$非常大的时候，一定程度上由原始海森矩阵$\mathrm{J}^\top\mathrm{J}$提供的信息就被抑制了，难以被利用。马夸特在莱文贝格的方法上进行了改进，根据海森矩阵的主元大小，对步长的不同梯度方向施加不同的阻尼：
 \begin{equation}
     \mathrm{H} = \left( \mathrm{J}^\top\mathrm{J}+\mu\mathbf{diag}(\mathrm{J}^\top\mathrm{J}) \right), \quad
-    \bm{g}     = \mathrm{J}^\top\bm{f}(\bm{x}) \\
+    \bm{\eta}  = -\mathrm{J}^\top\bm{f}(\bm{x})
 \end{equation}
 \begin{equation}
-    \bm{\delta}_{lm} = -\mathrm{H} \enspace\setminus\enspace \bm{g}
+    \bm{\delta}_{lm} = \mathrm{H} \enspace\setminus\enspace \bm{\eta}
     \label{eq:lm}
 \end{equation}
 这样一来，在梯度较小的方向阻尼较小，$\bm{\delta}_{lm}$的分量也就较大，反之则阻尼较大，$\bm{\delta}_{lm}$的分量较小。得益于更合理的阻尼设置，相对于单纯的莱文贝格法，莱文贝格-马夸特方法在实际应用中的收敛效率要更好。
@@ -179,40 +177,39 @@
 
 \begin{algorithm}[htb!]
 \caption{狗腿法}
-\begin{algorithmic}[1]
-    \algsetup{linenodelimiter=\ }
-    \STATE $\Delta \coloneqq \Delta_0, \bm{x} \coloneqq \bm{x}_0$
-    \FOR{$k = 0$ \TO $k_{max}$}
-        \STATE $k \coloneqq k+1$
-        \STATE 使用式\eqref{eq:lls}计算线性化子问题
-        \STATE 使用式\eqref{eq:gn}计算高斯-牛顿迭代步$\bm{\delta}_{gn}$
-        \STATE 使用式\eqref{eq:sd}计算最速下降迭代步$\bm{\delta}_{sd}$
-        \STATE 计算狗腿法步长$\bm{\delta}_{dl}$
+\begin{algorithmic}
+    \State $\Delta \coloneqq \Delta_0, \bm{x} \coloneqq \bm{x}_0$
+    \For{$k = 0 \rightarrow k_{max}$}
+        \State $k \coloneqq k+1$
+        \State 使用式\eqref{eq:lls}计算线性化子问题
+        \State 使用式\eqref{eq:gn}计算高斯-牛顿迭代步$\bm{\delta}_{gn}$
+        \State 使用式\eqref{eq:sd}计算最速下降迭代步$\bm{\delta}_{sd}$
+        \State 计算狗腿法步长$\bm{\delta}_{dl}$
 
-        \IF{\{步长$\bm{\delta}_{dl}$收敛\}}
-            \STATE 结束优化
-        \ENDIF
+        \If{\{步长$\bm{\delta}_{dl}$收敛\}}
+            \State 结束优化
+        \EndIf
 
-        \STATE 计算迭代步质量$\varrho$：
+        \State 计算迭代步质量$\varrho$：
         \[
             \varrho = \frac {F(\bm{x})-F(\bm{x}+\bm{\delta}_{dl})}
                             {L(\bm{0})-L(\bm{\delta}_{dl})}
         \]
 
-        \IF{\{$\varrho > 0.0$\}}
-            \STATE $\bm{x} \coloneqq \bm{x} + \bm{\delta}_{dl}$
-        \ENDIF
+        \If{\{$\varrho > 0.0$\}}
+            \State $\bm{x} \coloneqq \bm{x} + \bm{\delta}_{dl}$
+        \EndIf
 
-        \IF{\{$\varrho > \epsilon_0$\}}
-            \STATE $\Delta \coloneqq \text{fmax}\{\Delta,3\lVert\bm{\delta}_{dl}\rVert\}$
-        \ELSIF{\{$\varrho < \epsilon_1$\}}
-            \STATE $\Delta \coloneqq \Delta/2$
-        \ENDIF
+        \If{\{$\varrho > \epsilon_0$\}}
+            \State $\Delta \coloneqq \text{fmax}\{\Delta,3\lVert\bm{\delta}_{dl}\rVert\}$
+        \ElsIf{\{$\varrho < \epsilon_1$\}}
+            \State $\Delta \coloneqq \Delta/2$
+        \EndIf
 
-        \IF{\{信赖域$\Delta$收敛\}}
-            \STATE 结束优化
-        \ENDIF
-    \ENDFOR
+        \If{\{信赖域$\Delta$收敛\}}
+            \State 结束优化
+        \EndIf
+    \EndFor
 \end{algorithmic}
 \label{alg:dogleg}
 \end{algorithm}
@@ -235,12 +232,12 @@
                      \rho'\mathrm{I} + 2\rho'' \bm{f}(\bm{x}) \bm{f}^\top(\bm{x})
                  \right)
                  \mathrm{J} \\
-    \bm{g}(\bm{x}) = \rho' \mathrm{J}^\top \bm{f}(\bm{x})
+    \bm{\eta} = -\rho' \mathrm{J}^\top \bm{f}(\bm{x})
 \end{gathered}
 \label{eq:rnormal_eq}
 \end{equation}
 
-可见，鲁棒函数$\rho(\cdot)$会根据每一个目标函数的模其对正规方程的贡献权重，而且随着优化的进行，这个权重会在每一轮迭代中动态地调整。为了达到合理降低外点权重的目标，需要合理选择鲁棒函数形式。由式\eqref{eq:rnormal_eq}可见，鲁棒函数的选择尽可能地要满足如下几个条件\citep{zhang1995parameter}：
+可见，鲁棒函数$\rho(\cdot)$会根据每一个目标函数的模其对正规方程的贡献权重，而且随着优化的进行，这个权重会在每一轮迭代中动态地调整。为了达到合理降低外点权重的目标，需要合理选择鲁棒函数形式。由式\eqref{eq:rnormal_eq}可见，鲁棒函数的选择尽可能地要满足如下几个条件\citep{triggs1999bundle,zhang1995parameter}：
 \begin{enumerate}
     \item $\rho(0)=0$
     \item $\rho'(0)=1$
@@ -249,11 +246,11 @@
     \item 当$\lVert\bm{f}(\bm{x})\rVert^2$的值处于外点区域时，
           $\rho''(\lVert\bm{f}(\bm{x})\rVert^2)<0$
 \end{enumerate}
-其中前两点是为了保证鲁棒函数不对收敛的目标函数造成影响，后两点是为了保证鲁棒函数能有效地降低处于外点的目标函数的权重。常用的鲁棒函数有柯西函数（Cauchy's function）：
+其中前两点是为了保证鲁棒函数不对收敛的目标函数造成影响，后两点是为了保证鲁棒函数能有效地降低处于外点的目标函数的权重。常用的鲁棒函数有Cauchy函数：
 \begin{equation}
     \rho(s) = \ln(1+s)
 \end{equation}
-和休伯函数（Huber's function）：
+和Huber函数：
 \begin{equation}
     \rho(s) =
     \left\{
@@ -264,3 +261,9 @@
     \right.
 \end{equation}
 
+\begin{figure}[htb!]
+    \centering
+    \includegraphics[width=.8\textwidth]{figs/robust.png}
+    \caption{常用的两种鲁棒函数}
+    \label{fig:robust}
+\end{figure}

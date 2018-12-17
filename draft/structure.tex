@@ -32,7 +32,7 @@ includehead, includefoot
 \parskip 0.5ex plus 0.25ex minus 0.25ex
 
 \usepackage{amsmath,amssymb,blkarray,bm,mathtools,nicefrac}
-\usepackage{algorithm,algorithmic,multicol,enumitem,indentfirst,tabularx,titlesec}
+\usepackage{algorithm,algpseudocode,multicol,enumitem,indentfirst,tabularx,titlesec}
 \usepackage[font=small]{caption}
 \usepackage[square]{natbib}
 \usepackage[hidelinks]{hyperref}
@@ -41,6 +41,9 @@ includehead, includefoot
 %----------------------------------------------------------------------------------------
 %	CUSTOM COMMANDS
 %----------------------------------------------------------------------------------------
+
+\renewcommand{\algorithmicindent}{2.0em}
+\renewcommand{\algorithmiccomment}[1]{\hfill\{#1\}}
 
 \renewcommand{\today}{\number\year 年 \number\month 月}
 \renewcommand{\abstractname}{摘要}
@@ -78,7 +81,7 @@ includehead, includefoot
 %----------------------------------------------------------------------------------------
 
 \setlength{\parindent}{2em}
-\linespread{1.5}
+\linespread{1.25}
 \setlist[enumerate,itemize]{itemsep=0mm}
 
 \bibliographystyle{apalike}
