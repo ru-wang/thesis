@@ -14,20 +14,84 @@ EKF将状态估计的过程分为状态预测（predict）和状态更新（upda
 其中$\bm{u}_k$为输入控制变量，$\bm{w}_k$和$\bm{v}_{k+1}$分别为独立的系统噪声和观测噪声，均符合零均值高斯分布：
 \begin{equation}
 \begin{aligned}
-    \bm{w}_k     &\sim \mathcal{N}(\bm{0},\mathrm{Q}) \\
-    \bm{v}_{k+1} &\sim \mathcal{N}(\bm{0},\mathrm{R})
+    p(\bm{w}_k)     &\sim \mathcal{N}(\bm{0},\mathrm{Q}) \\
+    p(\bm{v}_{k+1}) &\sim \mathcal{N}(\bm{0},\mathrm{R})
 \end{aligned}
 \end{equation}
 
+\subsubsection{状态预测}
+
 对于一个离散时间的非线性系统，EKF假设已知$t_k$时刻系统的状态$\bm{x}_k$符合高斯分布：
 \begin{equation}
-    \bm{x}_k \sim \mathcal{N}(\hat{\bm{x}}_{k|k},\mathrm{P}_{k|k})
+    p(\bm{x}_k) \sim \mathcal{N}(\hat{\bm{x}}_{k|k},\mathrm{P}_{k|k})
 \end{equation}
-由于系统噪声$\bm{w}_k$未知，在$t_{k+1}$时刻可以通过转移模型得到当前系统状态的预测：
+由于系统噪声$\bm{w}_k$未知，在$t_{k+1}$时刻可以通过转移模型预测当前系统状态的先验分布：
 \begin{equation}
-    \hat{\bm{x}}_{k+1|k} = f(\hat{\bm{x}}_{k|k},\bm{u}_k,\bm{0})
+\begin{aligned}
+    p(\bm{x}_{k+1}) &\sim \mathcal{N}(\hat{\bm{x}}_{k+1|k},\mathrm{P}_{k+1|k}) \\
+    \hat{\bm{x}}_{k+1|k} &= f(\hat{\bm{x}}_{k|k},\bm{u}_k,\bm{0}) \\
+    \mathrm{P}_{k+1|k}   &= \mathrm{A}_{k+1} \mathrm{P}_{k|k} \mathrm{A}_{k+1}^\top +
+                            \mathrm{W}_{k+1}\mathrm{Q}_k\mathrm{W}_{k+1}^\top
+\end{aligned}
 \end{equation}
-假设在$t_{k+1}$时刻获得了对系统的观测$\bm{z}_{k+1}$而观测噪声$\bm{v}_{k+1}$未知，根据观测模型可以获取：
+其中
 \begin{equation}
-    \hat{\bm{z}}_{k+1|k} = h(\hat{\bm{x}}_{k+1|k},\bm{0})
+\begin{aligned}
+    \mathrm{A}_{k+1} &\equiv
+        \frac{\partial f}
+             {\partial\bm{x}}(\hat{\bm{x}}_{k|k},\bm{u}_k,\bm{0}) \\
+    \mathrm{W}_{k+1} &\equiv
+        \frac{\partial f}
+             {\partial\bm{w}}(\hat{\bm{x}}_{k|k},\bm{u}_k,\bm{0})
+\end{aligned}
+\end{equation}
+
+\subsubsection{状态更新}
+
+假设在$t_{k+1}$时刻获得了对系统的观测$\bm{z}_{k+1}$而观测噪声$\bm{v}_{k+1}$未知，根据观测模型可以得到观测值的条件概率分布：
+\begin{equation}
+\begin{aligned}
+    p(\bm{z}_{k+1}|\bm{x}_{k+1}) &\sim \mathcal{N}(\hat{\bm{z}}_{k+1}, \mathrm{S}_{k+1}) \\
+    \hat{\bm{z}}_{k+1} &= h(\hat{\bm{x}}_{k+1|k},\bm{0}) \\
+    \mathrm{S}_{k+1} &= \mathrm{H}_{k+1}\mathrm{P}_{k+1|k}\mathrm{H}_{k+1}^\top +
+                        \mathrm{V}_{k+1}\mathrm{R}_{k+1}\mathrm{V}_{k+1}^\top \\
+\end{aligned}
+\end{equation}
+其中
+\begin{equation}
+\begin{aligned}
+    \mathrm{H}_{k+1} &\equiv
+        \frac{\partial h}
+             {\partial\bm{x}}(\hat{\bm{x}}_{k+1|k},\bm{0}) \\
+    \mathrm{V}_{k+1} &\equiv
+        \frac{\partial h}
+             {\partial\bm{v}}(\hat{\bm{x}}_{k+1|k},\bm{0})
+\end{aligned}
+\end{equation}
+
+由于后验概率$p(\bm{x}_{k+1}|\bm{z}_{k+1}) \propto p(\bm{x}_{k+1})p(\bm{z}_{k+1}|\bm{x}_{k+1})$，可以构建最大化后验概率问题：
+\begin{equation}
+\begin{aligned}
+    \max_{\bm{x}_{k+1}}
+        &\frac{1}{\sqrt{2\pi}\mathrm{P}_{k+1|k}^{1/2}}
+        \cdot \exp \left( -\tfrac{1}{2}
+            \left\| \bm{x}_{k+1}-\hat{\bm{x}}_{k+1|k} \right\|
+            _{\mathrm{P}_{k+1|k}^{-1}}^2
+        \right) \\
+    \cdot
+        &\frac{1}{\sqrt{2\pi}\mathrm{S}_{k+1}^{1/2}}
+        \cdot \exp \left( -\tfrac{1}{2}
+            \left\| \bm{z}_{k+1}-\hat{\bm{z}}_{k+1} \right\|
+            _{\mathrm{S}_{k+1}^{-1}}^2
+        \right)
+\end{aligned}
+\end{equation}
+相当于最小化指数部分之和（以下省略下标）：
+\begin{equation}
+    \min_{\bm{x}} \tfrac{1}{2}
+        \left\| \bm{x}-\hat{\bm{x}} \right\|
+        _{{\mathrm{P}}^{-1}}^2 +
+    \tfrac{1}{2}
+        \left\| \bm{z}-\hat{\bm{z}} \right\|
+        _{\mathrm{S}^{-1}}^2
 \end{equation}
