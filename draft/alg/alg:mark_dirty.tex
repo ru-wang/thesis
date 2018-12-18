@@ -1,0 +1,33 @@
+\begin{algorithm}
+\caption{标记脏子图}
+\begin{algorithmic}
+    \Require 因子图$\check{\mathcal{G}}=\{\check{\mathcal{F}},\check{\Theta},\check{\mathcal{E}}\}$，
+             迭代步长$\bm{\delta}$
+    \Ensure 脏子图$\mathcal{G}=\{\mathcal{F},\Theta,\mathcal{E}\}$
+
+    \State $\mathcal{F}\coloneqq\{\}$，
+           $\Theta\coloneqq\{\}$，
+           $\mathcal{E}\coloneqq\{\}$
+
+    \ForAll{$\lVert\bm{\delta}_i\rVert \geq \varepsilon$}
+        \State $\Theta\coloneqq\Theta\cup\{\bm{\theta}_i\}$
+        \Comment{将变量$\bm{\theta}_i$标记为脏变量}
+
+        \ForAll
+        {$\{
+                \bm{f}_j\in\check{\mathcal{F}} |
+                \bm{\theta}_i\in\Theta_j
+        \}$}
+        \Comment{$\Theta_j$为与$\bm{f}_j$相连的变量集合}
+            \State $\Theta\coloneqq\Theta\cup\Theta_j$
+
+            \State $\mathcal{E} \coloneqq \mathcal{E} \cup \{e_{ij}\}$
+            \Comment{记录变量$\bm{\theta}_i$与因子$\bm{f}_j$相连的边$e_{ij}$}
+
+            \State $\mathcal{F} \coloneqq \mathcal{F} \cup \{\bm{f}_j\}$
+            \Comment{将因子$\bm{f}_j$标记为脏因子}
+        \EndFor
+    \EndFor
+\end{algorithmic}
+\label{alg:mark_dirty}
+\end{algorithm}
