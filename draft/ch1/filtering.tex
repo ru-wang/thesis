@@ -1,1 +1,33 @@
-\section{基于滤波方法的状态估计}
+\section{基于扩展卡尔曼滤波的状态估计}
+
+在SLAM领域中，主流的状态估计算法有两类：基于扩展卡尔曼滤波(extended Kalman filter，以下简称EKF)的滤波法和基于非线性最小二乘（nonlinear least squares）的优化法。两类方法没有本质上的区别，都是使用最大化后验概率（maximum a-posteriori estimation）的思想求解非线性系统的最优状态分布。本节将介绍滤波法的基本原理和方法，以及基于滤波法的MSCKF方法。
+
+\subsection{扩展卡尔曼滤波}
+
+EKF将状态估计的过程分为状态预测（predict）和状态更新（update）两个步骤，分别对应状态的转移模型（propagation model）和观测模型（observation model）。在状态预测阶段，EKF通过状态转移模型预测当前系统状态的先验分布，而在状态更新阶段，EKF通过当前时刻的观测模型和观测值对状态的分布进行修正，得到后验状态分布：
+\begin{equation}
+\begin{array}{rl}
+    \text{转移模型} & \bm{x}_{k+1} = f(\bm{x}_k,\bm{u}_k,\bm{w}_k) \\
+    \text{观测模型} & \bm{z}_{k+1} = h(\bm{x}_{k+1},\bm{v}_{k+1})
+\end{array}
+\end{equation}
+其中$\bm{u}_k$为输入控制变量，$\bm{w}_k$和$\bm{v}_{k+1}$分别为独立的系统噪声和观测噪声，均符合零均值高斯分布：
+\begin{equation}
+\begin{aligned}
+    \bm{w}_k     &\sim \mathcal{N}(\bm{0},\mathrm{Q}) \\
+    \bm{v}_{k+1} &\sim \mathcal{N}(\bm{0},\mathrm{R})
+\end{aligned}
+\end{equation}
+
+对于一个离散时间的非线性系统，EKF假设已知$t_k$时刻系统的状态$\bm{x}_k$符合高斯分布：
+\begin{equation}
+    \bm{x}_k \sim \mathcal{N}(\hat{\bm{x}}_{k|k},\mathrm{P}_{k|k})
+\end{equation}
+由于系统噪声$\bm{w}_k$未知，在$t_{k+1}$时刻可以通过转移模型得到当前系统状态的预测：
+\begin{equation}
+    \hat{\bm{x}}_{k+1|k} = f(\hat{\bm{x}}_{k|k},\bm{u}_k,\bm{0})
+\end{equation}
+假设在$t_{k+1}$时刻获得了对系统的观测$\bm{z}_{k+1}$而观测噪声$\bm{v}_{k+1}$未知，根据观测模型可以获取：
+\begin{equation}
+    \hat{\bm{z}}_{k+1|k} = h(\hat{\bm{x}}_{k+1|k},\bm{0})
+\end{equation}
