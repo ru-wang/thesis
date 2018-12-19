@@ -300,8 +300,8 @@ MSCKF算法是无结构信息的，也就是只估计相机/IMU的状态，而�
 \begin{equation}\label{eq:gtsam_res}
     \bm{\mathcal X}^\star =
         \arg\mathop{\min}_{\bm{\mathcal X}}
-        \sum_{i,j}\lVert \mathbf{r}_{\mathcal{I}_{ij}} \rVert^2_{\mathrm\Sigma_{ij}} +
-        \sum_{i} \sum_{l} \lVert \mathbf{r}_{\mathcal{C}_{il}} \rVert^2_{\mathrm\Sigma_{C}}
+        \sum_{i,j}\left\| \mathbf{r}_{\mathcal{I}_{ij}} \right\|^2_{\mathrm\Sigma_{ij}} +
+        \sum_{i} \sum_{l} \left\| \mathbf{r}_{\mathcal{C}_{il}} \right\|^2_{\mathrm\Sigma_{C}}
 \end{equation}
 
 \begin{figure}[htb!]

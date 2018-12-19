@@ -24,7 +24,7 @@
         \EndIf
 
         \If{\{$\varrho > \epsilon_0$\}}
-            \State $\Delta \coloneqq \text{fmax}\{\Delta,3\lVert\bm{\delta}_{dl}\rVert\}$
+            \State $\Delta \coloneqq \text{fmax}\{\Delta,3\left\|\bm{\delta}_{dl}\right\|\}$
         \ElsIf{\{$\varrho < \epsilon_1$\}}
             \State $\Delta \coloneqq \Delta/2$
         \EndIf

@@ -1,6 +1,6 @@
 \section{基于扩展卡尔曼滤波的状态估计}
 
-在SLAM领域中，主流的状态估计算法有两类：基于扩展卡尔曼滤波(extended Kalman filter，以下简称EKF)的滤波法和基于非线性最小二乘（nonlinear least squares）的优化法。两类方法没有本质上的区别，都是使用最大化后验概率（maximum a-posteriori estimation）的思想求解非线性系统的最优状态分布。本节将介绍滤波法的基本原理和方法，以及基于滤波法的MSCKF方法。
+在SLAM领域中，主流的状态估计算法有两类：基于扩展卡尔曼滤波(extended Kalman filter，以下简称EKF)的滤波法和基于非线性最小二乘（nonlinear least squares）的优化法。两类方法没有本质上的区别，都是使用最大化后验概率（maximum a-posteriori estimation）的思想求解非线性系统的最优状态分布。本节将介绍EKF的基本原理。
 
 \subsection{扩展卡尔曼滤波}
 
@@ -53,8 +53,7 @@ EKF将状态估计的过程分为状态预测（predict）和状态更新（upda
 \begin{aligned}
     p(\bm{z}_{k+1}|\bm{x}_{k+1}) &\sim \mathcal{N}(\hat{\bm{z}}_{k+1}, \mathrm{S}_{k+1}) \\
     \hat{\bm{z}}_{k+1} &= h(\hat{\bm{x}}_{k+1|k},\bm{0}) \\
-    \mathrm{S}_{k+1} &= \mathrm{H}_{k+1}\mathrm{P}_{k+1|k}\mathrm{H}_{k+1}^\top +
-                        \mathrm{V}_{k+1}\mathrm{R}_{k+1}\mathrm{V}_{k+1}^\top \\
+    \mathrm{S}_{k+1} &= \mathrm{V}_{k+1}\mathrm{R}_{k+1}\mathrm{V}_{k+1}^\top
 \end{aligned}
 \end{equation}
 其中
@@ -69,29 +68,66 @@ EKF将状态估计的过程分为状态预测（predict）和状态更新（upda
 \end{aligned}
 \end{equation}
 
-由于后验概率$p(\bm{x}_{k+1}|\bm{z}_{k+1}) \propto p(\bm{x}_{k+1})p(\bm{z}_{k+1}|\bm{x}_{k+1})$，可以构建最大化后验概率问题：
+为了简洁表示，以下省略下标。由于后验概率$p(\bm{x}|\bm{z}) \propto p(\bm{x})p(\bm{z}|\bm{x})$，可以构建最大化后验概率问题：
 \begin{equation}
 \begin{aligned}
-    \max_{\bm{x}_{k+1}}
-        &\frac{1}{\sqrt{2\pi}\mathrm{P}_{k+1|k}^{1/2}}
+    \max_{\bm{x}}
+        &\frac{1}{\sqrt{2\pi}\mathrm{P}^{\nicefrac{1}{2}}}
         \cdot \exp \left( -\tfrac{1}{2}
-            \left\| \bm{x}_{k+1}-\hat{\bm{x}}_{k+1|k} \right\|
-            _{\mathrm{P}_{k+1|k}^{-1}}^2
+            \left\| \bm{x}-\hat{\bm{x}} \right\|
+            _{\mathrm{P}^{-1}}^2
         \right) \\
     \cdot
-        &\frac{1}{\sqrt{2\pi}\mathrm{S}_{k+1}^{1/2}}
+        &\frac{1}{\sqrt{2\pi}\mathrm{S}^{\nicefrac{1}{2}}}
         \cdot \exp \left( -\tfrac{1}{2}
-            \left\| \bm{z}_{k+1}-\hat{\bm{z}}_{k+1} \right\|
-            _{\mathrm{S}_{k+1}^{-1}}^2
+            \left\| \bm{z}-\hat{\bm{z}} \right\|
+            _{\mathrm{S}^{-1}}^2
         \right)
 \end{aligned}
 \end{equation}
-相当于最小化指数部分之和（以下省略下标）：
+EKF假设状态先验$\hat{\bm{x}}$足够接近最优解$\bm{x}$，且$\bm{e}\equiv\bm{x}-\hat{\bm{x}}$。估最大化上式相当于最小化：
 \begin{equation}
     \min_{\bm{x}} \tfrac{1}{2}
-        \left\| \bm{x}-\hat{\bm{x}} \right\|
-        _{{\mathrm{P}}^{-1}}^2 +
+        \left\| \bm{e} \right\|_{{\mathrm{P}}^{-1}}^2 +
     \tfrac{1}{2}
-        \left\| \bm{z}-\hat{\bm{z}} \right\|
-        _{\mathrm{S}^{-1}}^2
+        \left\| \bm{z}-h(\hat{\bm{x}},\bm{0}) \right\|_{\mathrm{S}^{-1}}^2
+\end{equation}
+\begin{equation}
+\begin{aligned}
+    \bm{e} &=
+    \left( \mathrm{P} + \mathrm{H}^\top\mathrm{S}^{-1}\mathrm{H} \right)^{-1}
+    \mathrm{H}^\top\mathrm{S}^{-1}(\bm{z}-h(\hat{\bm{x}},\bm{0}))
+    \\
+    &= \mathrm{P}\mathrm{H}^\top
+    \left( \mathrm{H}\mathrm{P}\mathrm{H}^\top + \mathrm{S} \right)^{-1}
+    (\bm{z}-h(\hat{\bm{x}},\bm{0}))
+\end{aligned}
+\end{equation}
+
+记$t_{k+1}$时刻的卡尔曼增益（Kalman gain）为
+\begin{equation}
+    \mathrm{K}_{k+1} \equiv
+        \mathrm{P}_{k+1|k} \mathrm{H}_{k+1}^\top
+        \left(
+            \mathrm{H}_{k+1} \mathrm{P}_{k+1|k} \mathrm{H}_{k+1}^\top +
+            \mathrm{S}_{k+1}
+        \right)^{-1}
+\end{equation}
+可以对状态进行更新：
+\begin{equation}
+    \hat{\bm{x}}_{k+1|k+1} =
+        \hat{\bm{x}}_{k+1|k} + \mathrm{K}_{k+1}
+        (\bm{z}_{k+1}-h(\hat{\bm{x}}_{k+1|k},\bm{0}))
+\end{equation}
+同时，要更新后验协方差矩阵：
+\begin{equation}
+    \mathrm{P}_{k+1|k+1} =
+        \left( \mathrm{I} - \mathrm{K}_{k+1} \mathrm{H}_{k+1} \right)
+        \mathrm{P}_{k+1|k}
+        \left( \mathrm{I} - \mathrm{K}_{k+1} \mathrm{H}_{k+1} \right)^\top +
+        \mathrm{K}_{k+1} \mathrm{S}_{k+1} \mathrm{K}_{k+1}^\top
+\end{equation}
+因此，在状态更新阶段，可以得到状态的后验概率分布：
+\begin{equation}
+    p(\bm{x}_{k+1}) \sim \mathcal{N}(\hat{\bm{x}}_{k+1|k+1},\mathrm{P}_{k+1|k+1})
 \end{equation}
