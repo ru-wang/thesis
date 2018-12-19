@@ -206,7 +206,7 @@
 
 \input{alg/alg:dogleg.tex}
 
-\subsection{舒尔补}
+\subsection{舒尔补}\label{sec:schur}
 
 不论是使用高斯-牛顿法，莱文贝格-马夸特方法还是狗腿法，在每一轮迭代过程中，都需要进一步通过求解正规方程这个线性系统来得到每一轮迭代的步长（如式\eqref{eq:gn}，\eqref{eq:lm}，\eqref{eq:dl}）。根据经验，SLAM问题具有良好的稀疏性：通常三维点状态的数量要远大于相机状态的数量，而且通常三维点之间没有直接联系；同时，只有物理上距离比较接近的三维点状态和相机状态之间有相互约束。因此，由集束优化问题构建的海森矩阵$\mathrm{H}$也具有稀疏的性质，通过对变量适当的排序，将三维点状态和相机状态分别分组，一般可以得到如图\ref{fig:sparse_matrix}所示的特殊的稀疏结构。
 
@@ -245,6 +245,8 @@
     \left( \bm{p}-\mathrm{W}^\top\bm{\delta}_c \right)
     \label{eq:back_sub}
 \end{equation}
+
+舒尔补可以加速稀疏线性系统的求解，但需要注意的是，舒尔补一般会造成矩阵的填充效应（fill in）\citep{kaess2008isam}，即破坏矩阵稀疏性的情况。在使用舒尔补的时候如果不注意变量的排序，则很容易造成严重的填充。
 
 \subsection{鲁棒估计方法}
 
@@ -299,3 +301,77 @@
     \caption{常用的两种鲁棒函数}
     \label{fig:robust}
 \end{figure}
+
+\subsection{边缘状态估计}
+
+对于比较大的系统，状态数量比较多，一般需要通过边缘化对状态进行精简。在图优化中对应的就是通过删减状态节点调整因子图的过程。假设状态$\bm{x}$和$\bm{y}$符合联合高斯分布：
+\begin{equation}
+p(\bm{x},\bm{y}) \sim \mathcal{N}
+\left(
+    \begin{bmatrix} \bm{\mu}_x \\ \bm{\mu}_y \end{bmatrix},
+    \begin{bmatrix}
+        \Sigma_{xx} & \Sigma_{yx}^\top \\
+        \Sigma_{yx} & \Sigma_{yy}
+    \end{bmatrix}
+    \label{eq:joint}
+\right)
+\end{equation}
+对于高斯分布，总是可以使用舒尔补将上面的联合概率分布拆分成两个独立分布的乘积$p(\bm{x},\bm{y})=p(\bm{x}|\bm{y})p(\bm{x})$：
+\begin{equation}
+\begin{aligned}
+    p(\bm{x}|\bm{y}) &\sim \mathcal{N}(
+        \bm{\mu}_x+\Sigma_{yx}^\top\Sigma_{yy}^{-1}(\bm{y}-\bm{\mu}_y),
+        \Sigma_{xx}-\Sigma_{yx}^\top\Sigma_{yy}^{-1}\Sigma_{yx}) \\
+    p(\bm{y}) &\sim \mathcal{N}(\bm{\mu}_y,\Sigma_{yy})
+\end{aligned}
+\label{eq:indep}
+\end{equation}
+其中$p(\bm{y})$就是变量$\bm{y}$的边缘概率，而$p(\bm{x}|\bm{y})$则是变量$\bm{x}$关于$\bm{y}$的条件概率。在最小二乘问题中，正规方程的海森矩阵$\mathrm{H}$和右侧$\bm{\eta}$对应的是信息矩阵（information matrix）和信息向量（information vector）\citep{barfoot2017state}。信息矩阵也对应于状态的协方差矩阵的逆$\Sigma^{-1}$，而正规方程的解对应与变量的期望。以状态$\bm{x}$和$\bm{y}$为例，可以构建正规方程：
+\begin{equation}
+\begin{bmatrix} \bm{x} \\ \bm{y} \end{bmatrix} =
+\begin{bmatrix}
+    \mathrm{H}_{xx} & \mathrm{H}_{yx}^\top \\
+    \mathrm{H}_{yx} & \mathrm{H}_{yy}
+\end{bmatrix} \enspace\setminus\enspace
+\begin{bmatrix} \bm{\eta}_x \\ \bm{\eta}_y \end{bmatrix}
+\end{equation}
+易得联合概率分布：
+\begin{equation}
+p(\bm{x},\bm{y}) \sim \mathcal{N}
+\left(
+\begin{bmatrix}
+    \mathrm{H}_{xx} & \mathrm{H}_{yx}^\top \\
+    \mathrm{H}_{yx} & \mathrm{H}_{yy}
+\end{bmatrix}^{-1}
+\begin{bmatrix} \bm{\eta}_x \\ \bm{\eta}_y \end{bmatrix},
+\begin{bmatrix}
+    \mathrm{H}_{xx} & \mathrm{H}_{yx}^\top \\
+    \mathrm{H}_{yx} & \mathrm{H}_{yy}
+\end{bmatrix}^{-1}
+\right)
+\end{equation}
+根据式\eqref{eq:indep}，同样使用舒尔补可以计算得到状态$\bm{y}$的边缘概率分布：
+\begin{equation}
+\begin{gathered}
+p(\bm{y}) \sim \mathcal{N}
+\Big(
+    (
+        \underbrace{
+        \mathrm{H}_{yy}-\mathrm{H}_{yx}\mathrm{H}_{xx}^{-1}\mathrm{H}_{yx}^\top
+        }_{\text{边缘信息矩阵}}
+    )^{-1}
+    %
+    (
+        \underbrace{
+        \bm{\eta}_y-\mathrm{H}_{yx}\mathrm{H}_{xx}^{-1}\bm{\eta}_x
+        }_{\text{边缘信息向量}}
+    ), \\
+    %
+    \underbrace{
+    (\mathrm{H}_{yy}-\mathrm{H}_{yx}\mathrm{H}_{xx}^{-1}\mathrm{H}_{yx}^\top)^{-1}
+    }_{\text{边缘协方差}}
+\Big)
+\end{gathered}
+\end{equation}
+
+如\ref{sec:schur}节中提到的，舒尔补一般会造成稀疏矩阵的填充效应，在使用舒尔补进行边缘化操作的时候，同样会遇到这样的情况。因此，在使用边缘化进行状态删减的时候，也需要注意使用合理的策略选择被删减的状态，尽量减少填充。
