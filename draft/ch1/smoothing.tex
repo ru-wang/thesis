@@ -1,4 +1,4 @@
-\section{基于优化方法的状态估计}
+\section{基于非线性优化方法的状态估计}
 
 继上一节介绍了基于扩展卡尔曼滤波的状态估计方法，本节将继续介绍基于非线性最小二乘的状态估计方法，包括几种主流的求解最小二乘估计的方法以及加速求解的算法，并从理论角度分析滤波法和优化法的优劣。
 
@@ -10,7 +10,7 @@
 
 \begin{figure}[htb!]
     \centering
-    \includegraphics[width=.7\textwidth]{figs/isam_factor_graph.png}
+    \includegraphics[width=.6\textwidth]{figs/isam_factor_graph.png}
     \caption{因子图示例\citep{kaess2012isam2}：紫色节点代表位姿状态，绿色节点代表三维点状态，黑色节点代表状态之间的约束因子。}
     \label{fig:isam_factor_graph}
 \end{figure}
@@ -74,7 +74,7 @@
 \end{equation}
 求解如下线性系统：
 \begin{equation}
-    \bm{\delta} = \mathrm{H} \enspace\setminus\enspace \bm{\eta}
+    \bm{\delta} = \mathrm{H} \:\setminus\: \bm{\eta}
     \label{eq:linsys}
 \end{equation}
 其中$\bm{\eta}=-\bm{g}(\bm{x})$。使用$\bm{\delta}$更新变量：$\bm{x}\leftarrow\bm{x}+\bm{\delta}$。式\eqref{eq:linsys}通常称为正规方程（normal equation），如上求解非线性最小二乘的方法则为正规方程法。线性的问题中，矩阵$\mathrm{H}(\bm{x})$至少为半正定矩阵, 给定任意初值$\bm{x}$（这里选择了初值为$\bm{0}$）只需一步就可解得式\eqref{eq:nls}的全局最优解。而对于非线性的情况，则需要多次迭代才能解得局部最优解。
@@ -111,7 +111,7 @@
 \end{equation}
 再求解，得到高斯-牛顿法一次迭代的结果：
 \begin{equation}
-    \bm{\delta}_{gn} = \mathrm{H}_{gn} \enspace\setminus\enspace \bm{\eta}
+    \bm{\delta}_{gn} = \mathrm{H}_{gn} \:\setminus\: \bm{\eta}
     \label{eq:gn}
 \end{equation}
 将此结果更新至变量：$\bm{x}\leftarrow\bm{x}+\bm{\delta}$，然后不断重复以上过程，直至结果收敛。
@@ -122,7 +122,7 @@
 
 除了高斯-牛顿法之外，还有一种经典的求解非线性最小二乘优化的算法：莱文贝格-马夸特（Levenberg-Marquardt）法。它也被认为是带有阻尼因子的高斯-牛顿法，也是信赖域方法（trust region method）的前身\citep{jorge2006numerical}。
 
-众所周知，一般的视觉里程计算法中，尺度是不可观测的（unobservable）——在视觉里程计的状态估计中，对全局所有的三维点坐标和相机位置进行统一的缩放，不会引起重投影误差的改变（在不考虑数值误差的情况下）。从求解视觉里程计集束优化问题的角度来看，这一性质造成了在直接使用高斯-牛顿法时海森矩阵的秩亏现象，即矩阵$\mathrm{J}^\top\mathrm{J}$为半正定的情况。此时直接使用矩阵分解求逆的方法求解线性最小二乘子问题就会得到数值不稳定的结果，比如解得的步长在某个方向过大等。
+前面提到，一般的纯视觉的SLAM算法中，尺度是不可观测的，也就是说视觉里程计的状态估计中，对全局所有的三维点坐标和相机位置进行统一的缩放，不会引起重投影误差的改变（在不考虑数值误差的情况下）。从求解视觉里程计集束优化问题的角度来看，这一性质造成了在直接使用高斯-牛顿法时海森矩阵的秩亏现象，即矩阵$\mathrm{J}^\top\mathrm{J}$为半正定的情况。此时直接使用矩阵分解求逆的方法求解线性最小二乘子问题就会得到数值不稳定的结果，比如解得的步长在某个方向过大等。
 
 \subsubsection{莱文贝格法}
 
@@ -140,7 +140,7 @@
     \bm{\eta}      = -\mathrm{J}^\top\bm{f}(\bm{x})
 \end{equation}
 \begin{equation}
-    \bm{\delta}_{l} = \mathrm{H}_{l} \enspace\setminus\enspace \bm{\eta}
+    \bm{\delta}_{l} = \mathrm{H}_{l} \:\setminus\: \bm{\eta}
     \label{eq:levenberg}
 \end{equation}
 其中的$\mu$就是所谓的阻尼因子（damping factor）。
@@ -161,7 +161,7 @@
     \bm{\eta}  = -\mathrm{J}^\top\bm{f}(\bm{x})
 \end{equation}
 \begin{equation}
-    \bm{\delta}_{lm} = \mathrm{H} \enspace\setminus\enspace \bm{\eta}
+    \bm{\delta}_{lm} = \mathrm{H} \:\setminus\: \bm{\eta}
     \label{eq:lm}
 \end{equation}
 这样一来，在梯度较小的方向阻尼较小，$\bm{\delta}_{lm}$的分量也就较大，反之则阻尼较大，$\bm{\delta}_{lm}$的分量较小。得益于更合理的阻尼设置，相对于单纯的莱文贝格法，莱文贝格-马夸特方法在实际应用中的收敛效率要更好。
@@ -235,13 +235,13 @@
 
 记舒尔补矩阵为$\mathrm{S}\equiv\mathrm{C}-\mathrm{W}\mathrm{P}^{-1}\mathrm{W}^\top$，右侧为$\bm{b}\equiv\bm{c}-\mathrm{W}\mathrm{P}^{-1}\bm{p}$。如前面提到的，集束优化问题中的三维点状态数量远多于相机状态数量，故矩阵$\mathrm{S}$的规模远小于$\mathrm{P}$的规模，通过求解下舒尔补方程：
 \begin{equation}
-    \bm{\delta}_c = \mathrm{S} \enspace\setminus\enspace \bm{b}
+    \bm{\delta}_c = \mathrm{S} \:\setminus\: \bm{b}
     \label{eq:solve_schur}
 \end{equation}
 可以快速先得到相机状态的迭代步。而又因为矩阵$\mathrm{P}$通常呈块对角状，其逆矩阵的求解$\mathrm{P}^{-1}$也非常容易，通过变量回代又可以高效地求解剩余的三维点状态的迭代步：
 \begin{equation}
     \bm{\delta}_p = \mathrm{P}
-    \enspace\setminus\enspace
+    \:\setminus\:
     \left( \bm{p}-\mathrm{W}^\top\bm{\delta}_c \right)
     \label{eq:back_sub}
 \end{equation}
@@ -332,7 +332,7 @@ p(\bm{x},\bm{y}) \sim \mathcal{N}
 \begin{bmatrix}
     \mathrm{H}_{xx} & \mathrm{H}_{yx}^\top \\
     \mathrm{H}_{yx} & \mathrm{H}_{yy}
-\end{bmatrix} \enspace\setminus\enspace
+\end{bmatrix} \:\setminus\:
 \begin{bmatrix} \bm{\eta}_x \\ \bm{\eta}_y \end{bmatrix}
 \end{equation}
 易得联合概率分布：
@@ -355,20 +355,17 @@ p(\bm{x},\bm{y}) \sim \mathcal{N}
 \begin{gathered}
 p(\bm{y}) \sim \mathcal{N}
 \Big(
-    (
-        \underbrace{
-        \mathrm{H}_{yy}-\mathrm{H}_{yx}\mathrm{H}_{xx}^{-1}\mathrm{H}_{yx}^\top
-        }_{\text{边缘信息矩阵}}
-    )^{-1}
+    \overunderbraces{& & \br{1}{\text{边缘信息矩阵}} & & & \br{1}{\text{边缘信息向量}}}
+        {
+            & ( & \mathrm{H}_{yy}-\mathrm{H}_{yx}\mathrm{H}_{xx}^{-1}\mathrm{H}_{yx}^\top & )^{-1}
+            & ( & \bm{\eta}_y-\mathrm{H}_{yx}\mathrm{H}_{xx}^{-1}\bm{\eta}_x              & )
+        }
+    {& \br{6}{\text{边缘期望}}}
     %
-    (
-        \underbrace{
-        \bm{\eta}_y-\mathrm{H}_{yx}\mathrm{H}_{xx}^{-1}\bm{\eta}_x
-        }_{\text{边缘信息向量}}
-    ), \\
+    , \\
     %
     \underbrace{
-    (\mathrm{H}_{yy}-\mathrm{H}_{yx}\mathrm{H}_{xx}^{-1}\mathrm{H}_{yx}^\top)^{-1}
+        (\mathrm{H}_{yy}-\mathrm{H}_{yx}\mathrm{H}_{xx}^{-1}\mathrm{H}_{yx}^\top)^{-1}
     }_{\text{边缘协方差}}
 \Big)
 \end{gathered}

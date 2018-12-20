@@ -8,3 +8,4 @@ let g:airline_theme = 'typewriter'
 let g:goyo_width = '100'
 call ConfigureTex()
 autocmd! User GoyoEnter nested set nolinebreak
+autocmd! User GoyoLeave nested set nolinebreak
