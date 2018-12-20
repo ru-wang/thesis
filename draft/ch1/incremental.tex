@@ -1,6 +1,6 @@
 \section{增量式集束优化方法}
 
-以\citeauthor{kaess2008isam}提出的iSAM系列文章为例（iSAM\citep{kaess2008isam}和iSAM2\citep{kaess2012isam2}），增量式集束优化算法很好地利用了SLAM集束优化问题的稀疏性和局部性，实现了高效的求解。iSAM系列的文章提出：
+以iSAM\citep{kaess2008isam}、iSAM2\citep{kaess2012isam2}系列文章为例，增量式集束优化算法很好地利用了SLAM集束优化问题的稀疏性和局部性，实现了高效的求解。iSAM系列的文章提出：
 \begin{itemize}
     \item 对观测的雅各比矩阵（measurement Jacobian matrices）或者信息矩阵（information matrix）进行分解得到平方根信息矩阵（square root information matrix）的过程，等同于对因子图转化成贝叶斯置信网络的过程；
     \item 矩阵分解时产生的填充现象（fill-in），则等同于因子图转化过程中，多出来的变量之间的边；

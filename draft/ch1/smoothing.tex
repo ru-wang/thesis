@@ -6,7 +6,7 @@
 
 \subsection{基于图优化的状态估计}
 
-图优化方法是分析并求解SLAM后端状态估计问题的常用工具。最早在机器人领域，为了解决多段激光传感器数据额融合时的全局一致性问题，\citep{lu1997globally,lu1997robot}提出了基于位姿图的优化方法。\citeauthor{thrun2006graph}在此基础上进一步提出了GraphSLAM\citep{thrun2006graph}，使用由位姿状态和三维点状态以及它们之间的约束构成的因子图来描述集束优化问题。因子图可以很直观地描述集束优化问题中状态和约束之间的关联，有助于分析集束优化问题的各种性质。经过长时间的发展，图优化方法已经成为SLAM领域的经典方法。
+图优化方法是分析并求解SLAM后端状态估计问题的常用工具。最早在机器人领域，为了解决多段激光传感器数据额融合时的全局一致性问题，\citep{lu1997globally,lu1997robot}提出了基于位姿图的优化方法。\citep{thrun2006graph}在此基础上进一步提出了GraphSLAM，使用由位姿状态和三维点状态以及它们之间的约束构成的因子图来描述集束优化问题。因子图可以很直观地描述集束优化问题中状态和约束之间的关联，有助于分析集束优化问题的各种性质。经过长时间的发展，图优化方法已经成为SLAM领域的经典方法。
 
 \begin{figure}[htb!]
     \centering
@@ -233,7 +233,7 @@
     \label{eq:schur_complement}
 \end{equation}
 
-记舒尔补矩阵为$\mathrm{S}\equiv\mathrm{C}-\mathrm{W}\mathrm{P}^{-1}\mathrm{W}^\top$，右侧为$\bm{b}\equiv\bm{c}-\mathrm{W}\mathrm{P}^{-1}\bm{p}$。如前面提到的，集束优化问题中的三维点状态数量远多于相机状态数量，故矩阵$\mathrm{S}$的规模远小于$\mathrm{P}$的规模，通过求解下舒尔补方程：
+记舒尔补矩阵为$\mathrm{S}\doteq\mathrm{C}-\mathrm{W}\mathrm{P}^{-1}\mathrm{W}^\top$，右侧为$\bm{b}\doteq\bm{c}-\mathrm{W}\mathrm{P}^{-1}\bm{p}$。如前面提到的，集束优化问题中的三维点状态数量远多于相机状态数量，故矩阵$\mathrm{S}$的规模远小于$\mathrm{P}$的规模，通过求解下舒尔补方程：
 \begin{equation}
     \bm{\delta}_c = \mathrm{S} \:\setminus\: \bm{b}
     \label{eq:solve_schur}
@@ -297,7 +297,7 @@
 
 \begin{figure}[htb!]
     \centering
-    \includegraphics[width=.8\textwidth]{figs/robust.png}
+    \includegraphics[width=.6\textwidth]{figs/robust.png}
     \caption{常用的两种鲁棒函数}
     \label{fig:robust}
 \end{figure}
