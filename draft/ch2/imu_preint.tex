@@ -11,13 +11,13 @@
                     (\tilde{\bm\omega}_k - \bm{b}_k^g - \bm{n}_k^g) \Delta t
                 \right) \\
 \bm{v}_j &= \bm{v}_i + \bm{g} \Delta t_{ij} + \sum_{k=i}^{j-1}
-                \mathrm{R}_k (\tilde{\bm a}_k - \bm{b}_k^a - \bmn_k^a) \Delta t \\
+\mathrm{R}_k (\tilde{\bm{a}}_k - \bm{b}_k^a - \bm{n}_k^a) \Delta t \\
 \bm{p}_j &= \bm{p}_i + \sum_{k=i}^{j-1}
                 \left[
                     \bm{v}_k \Delta t +
                     \frac{1}{2}\bm{g}\Delta t^2 +
                     \frac{1}{2}\mathrm{R}_k
-                    (\tilde{\bm a}_k - \bm{b}_k^a - \bmn_k^a) \Delta t^2
+                    (\tilde{\bm a}_k - \bm{b}_k^a - \bm{n}_k^a) \Delta t^2
                 \right]
     \end{aligned}
 \end{equation}
@@ -39,7 +39,7 @@
   &\doteq \mathrm{R}_i^\top (\bm{v}_j - \bm{v}_i - \bm{g} \Delta t_{ij})
   = \sum_{k=i}^{j-1}
   \Delta\mathrm{R}_{ik}
-  (\tilde{\bm a}_k - \bm{b}_k^a - \bmn_k^a) \Delta t \\
+  (\tilde{\bm a}_k - \bm{b}_k^a - \bm{n}_k^a) \Delta t \\
   %
   \Delta\bm{p}_{ij}
   &\doteq \mathrm{R}_i^\top
@@ -52,7 +52,7 @@
   \left[
       \Delta\bm{v}_{ik} \Delta t +
       \frac{1}{2} \Delta\mathrm{R}_{ik}
-      (\tilde{\bm a}_k - \bm{b}_k^a - \bmn_k^a) \Delta t^2
+      (\tilde{\bm a}_k - \bm{b}_k^a - \bm{n}_k^a) \Delta t^2
   \right]
 \end{aligned}\label{eq:raw_int}
 \end{equation}
@@ -74,7 +74,7 @@
 \end{aligned}
 \end{equation}
 
-最终可以得到IMU预积分项$\left[\Delta\tilde{\mathrm R}_{ij},\Delta\tilde{\bm v}_{ij},\Delta\tilde{\bm p}_{ij}\right]$和预积分的误差项$\bmn_{ij} \doteq \left[\delta\bm\phi_{ij},\delta\bm{v}_{ij},\delta\bm{p}_{ij}\right]$，并且认为这个$9$维的误差也是符合均值为零的高斯分布的。记它的协方差为$\Sigma_{ij}$，即$\bm{n}_{ij} \sim \mathcal{N}\left(\bm{0},\Sigma_{ij}\right)$。而这个协方差，显然是在预积分的过程中通过IMU读数的白噪声累积得来的。因此需要在预积分的过程中根据白噪声的协方差$\bm{n} \doteq \left[\bm{n}^g,\bm{n}^a\right] \sim \mathcal{N}(\bm{0},\mathrm\Sigma_{\bm{n}})$同时也完成白噪声的传递。限于篇幅，白噪声的传递的推导，这里不再给出。
+最终可以得到IMU预积分项$\left[\Delta\tilde{\mathrm R}_{ij},\Delta\tilde{\bm v}_{ij},\Delta\tilde{\bm p}_{ij}\right]$和预积分的误差项$\bm{n}_{ij} \doteq \left[\delta\bm\phi_{ij},\delta\bm{v}_{ij},\delta\bm{p}_{ij}\right]$，并且认为这个$9$维的误差也是符合均值为零的高斯分布的。记它的协方差为$\Sigma_{ij}$，即$\bm{n}_{ij} \sim \mathcal{N}\left(\bm{0},\Sigma_{ij}\right)$。而这个协方差，显然是在预积分的过程中通过IMU读数的白噪声累积得来的。因此需要在预积分的过程中根据白噪声的协方差$\bm{n} \doteq \left[\bm{n}^g,\bm{n}^a\right] \sim \mathcal{N}(\bm{0},\mathrm\Sigma_{\bm{n}})$同时也完成白噪声的传递。限于篇幅，白噪声的传递的推导，这里不再给出。
 
 \section{偏移量的线性修正}
 
