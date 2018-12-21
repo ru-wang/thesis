@@ -66,11 +66,11 @@ IMU是测量物体三轴角速度以及加速度的装置，包含三轴陀螺�
 \end{equation}
 其中$\Delta t$为采样时间间隔，并且陀螺仪、加速度计三轴的噪声统计独立。
 
-\subsection{IMU状态传递}
+\subsection{IMU状态传播}
 
-所谓的IMU状态传递（IMU propagation）指的就是根据通过将当前时刻IMU的读数在时间上进行积分，来得到下一时刻的IMU状态。这个IMU状态包括IMU的位姿、运动以及噪声等，通过积分操作，IMU读数的信息就被“传递”到了下一时刻。
+所谓的IMU状态传播（IMU propagation）指的就是根据通过将当前时刻IMU的读数在时间上进行积分，来得到下一时刻的IMU状态。这个IMU状态包括IMU的位姿、运动以及噪声等，通过积分操作，IMU读数的信息就被传播到了下一时刻。
 
-我们先来考虑理想情况，也就是IMU的读数不存在白噪声，偏移量也不存在随机游走的情况，此时IMU的读数符合：
+首先考虑理想情况，也就是IMU的读数不存在白噪声，偏移量也不存在随机游走的情况，此时IMU的读数符合：
 \begin{equation}
 \begin{aligned}
     \bm{\omega}  &= \tilde{\bm{\omega}} - \bm{b}^g, \\
@@ -81,7 +81,7 @@ IMU是测量物体三轴角速度以及加速度的装置，包含三轴陀螺�
 记全局坐标系下IMU的状态为（为保持简洁，省略了转置符号${}^\top$）：
 
 \begin{equation}
-  \bm{X}_{\textrm{IMU}} \triangleq
+  \bm{X}_{\textrm{IMU}} \doteq
   \left[
       \prescript{G}{}{\mathrm R},
       \prescript{G}{}{\bm p},
@@ -90,8 +90,7 @@ IMU是测量物体三轴角速度以及加速度的装置，包含三轴陀螺�
   \right].
 \end{equation}
 
-具体来说，积分过程包括积分这个IMU状态向量的五个分量。那么，要对IMU状态进行积分，我们首先要写出IMU状态关于时间的导数：
-
+具体来说，积分过程包括积分这个IMU状态向量的五个分量。那么，要对IMU状态进行积分，首先需要写出IMU状态关于时间的导数：
 \begin{equation}
 \begin{aligned}
     \prescript{G}{}{\dot{\mathrm R}}
@@ -114,4 +113,4 @@ IMU是测量物体三轴角速度以及加速度的装置，包含三轴陀螺�
     \item 角速度偏移和加速度偏移由于增长符合零均值随机游走，所以直接取旧的状态中的值。
 \end{enumerate}
 
-我们可以使用任意一种数值积分算法来实现，比如欧拉法（Euler method）、龙格库塔法（Runge-Kutta methods）\citep{wiki2017runge}等。此外，不仅要对状态向量进行数值积分，同时我们还要更新协方差矩阵。
+可以使用任意一种数值积分算法来实现，比如欧拉法（Euler method）、龙格库塔法（Runge-Kutta methods）等。此外，不仅要对状态向量进行数值积分，同时还要更新协方差矩阵。

@@ -1,5 +1,5 @@
 \begin{algorithm}[htb!]
-\caption{狗腿法}
+\caption{Dog-Leg法}
 \begin{algorithmic}
     \State $\Delta \coloneqq \Delta_0, \bm{x} \coloneqq \bm{x}_0$
     \For{$k = 0 \rightarrow k_{max}$}
@@ -7,7 +7,7 @@
         \State 使用式\eqref{eq:lls}计算线性化子问题
         \State 使用式\eqref{eq:gn}计算高斯-牛顿迭代步$\bm{\delta}_{gn}$
         \State 使用式\eqref{eq:sd}计算最速下降迭代步$\bm{\delta}_{sd}$
-        \State 使用式\eqref{eq:dl}计算狗腿法步长$\bm{\delta}_{dl}$
+        \State 使用式\eqref{eq:dl}计算Dog-Leg法步长$\bm{\delta}_{dl}$
 
         \If{\{步长$\bm{\delta}_{dl}$收敛\}}
             \State 结束优化
