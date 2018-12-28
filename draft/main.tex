@@ -13,10 +13,7 @@
 \thispagestyle{empty}
 \printtitle
 
-\begin{abstract}
-    我是摘要，我超吊。
-\end{abstract}
-\addcontentsline{toc}{chapter}{摘要}
+\input{abstract.tex}
 
 \newpage
 \setcounter{page}{1}
@@ -33,9 +30,7 @@
 
 \input{ch3/chapter3.tex} % chapter : 基于增量式集束优化的高效状态估计
 
-\input{ch4/chapter4.tex} % chapter : 视觉惯性SLAM系统设计
-
-\input{ch5/chapter5.tex} % chapter : 总结与展望
+\input{ch4/chapter4.tex} % chapter : 结论与展望
 
 \newpage
 \bibliography{bibliography.bib}
