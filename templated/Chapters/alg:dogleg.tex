@@ -7,10 +7,10 @@
     \State $\Delta \coloneqq \Delta_0, \bm{x} \coloneqq \bm{x}_0$
     \For{$k = 0 \rightarrow k_{max}$}
         \State $k \coloneqq k+1$
-        \State 使用 式~\eqref{eq:lls}计算线性化子问题
-        \State 使用 式~\eqref{eq:gn}计算高斯-牛顿迭代步$\bm{\delta}_{gn}$
-        \State 使用 式~\eqref{eq:sd}计算最速下降迭代步$\bm{\delta}_{sd}$
-        \State 使用 式~\eqref{eq:dl}计算Dog-Leg法步长$\bm{\delta}_{dl}$
+        \State 使用 式\eqref{eq:lls}计算线性化子问题
+        \State 使用 式\eqref{eq:gn}计算高斯-牛顿迭代步$\bm{\delta}_{gn}$
+        \State 使用 式\eqref{eq:sd}计算最速下降迭代步$\bm{\delta}_{sd}$
+        \State 使用 式\eqref{eq:dl}计算Dog-Leg法步长$\bm{\delta}_{dl}$
 
         \If{\{步长$\bm{\delta}_{dl}$收敛\}}
             \State 结束优化
