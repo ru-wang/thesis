@@ -224,6 +224,7 @@ Dog-Leg法根据当前的信赖域半径$\Delta$和以上求解的两个步长�
         \mathrm{P} & \mathrm{W}^\top \\
         \mathrm{W} & \mathrm{C}
     \end{bmatrix}, \quad
+    \bm{\delta} = \begin{bmatrix} \bm{\delta}_p \\ \bm{\delta}_c \end{bmatrix}, \quad
     \bm{\eta} = \begin{bmatrix} \bm{p} \\ \bm{c} \end{bmatrix}
 \end{equation}
 其中$\mathrm{P}$是三维点状态对应的海森矩阵，$\mathrm{C}$是相机状态对应的海森矩阵，$\mathrm{W}$是三维点状态和相机状态的海森矩阵。求解三维点状态和相机状态之前，先通过行变换构建舒尔补方程：

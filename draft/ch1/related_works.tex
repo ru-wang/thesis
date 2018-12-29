@@ -6,7 +6,7 @@ VSLAM和VISLAM都需要根据系统的先验估计、传感器观测来对系统
 
 一般来讲滤波法的时间复杂度小于同规模的优化法，早期由于计算能力的限制，选择滤波法进行状态估计是一种合理的选择。MonoSLAM\citep{davison2007monoslam}是最早的单目VSLAM系统之一。MonoSLAM使用了EKF求解相机状态和三维点状态，也是最早的滤波法VSLAM系统之一。在状态估计阶段，MonoSLAM快速地将旧的相机状态通过边缘化操作消去，将系统的状态数量限制在$O(N)$，其中$N$为三维点的数量，同时状态估计的时间复杂度被限制在了$O(N^3)$。因此MonoSLAM的运行时间得到了限制，不至于随着时间无限增长。但由于MonoSLAM过早地将相机状态进行边缘化，一部分尚未收敛的相机状态就将错误的信息留在了系统的状态中，导致了较大的误差累积。另一方面，频繁的边缘化操作也就导致了系统状态的协方差矩阵变得稠密，无法利用稀疏的求解方法进行加速，这一点也是基于EKF的算法的通病。
 
-另一个经典的基于EKF的SLAM系统是MSCKF\citep{mourikis2007mul}。MSCKF全称是多状态约束卡尔曼滤波（Multi-State Constraints Kalman Filter）。与MonoSLAM不同的是，MSCKF使用了相机状态窗口的概念，计算大小为$M$的系统的EKF更新，其中$M$为状态窗口的大小。因此MSCKF将状态估计的实现复杂度限制在了$O(M^3)$。由于在SLAM问题中，三维点的数量往往远远大于相机状态的数量：$N \gg M$，MSCKF算法可以达到实时性的要求，效率要高于MonoSLAM。又由于MSCKF保留了一定数量的历史相机状态，而不是尽早地将旧的状态消去，因此误差累积更小，更适合长时间、大尺度的应用。
+另一个经典的基于EKF的SLAM系统是MSCKF\citep{mourikis2007multi}。MSCKF全称是多状态约束卡尔曼滤波（Multi-State Constraints Kalman Filter）。与MonoSLAM不同的是，MSCKF使用了相机状态窗口的概念，计算大小为$M$的系统的EKF更新，其中$M$为状态窗口的大小。因此MSCKF将状态估计的实现复杂度限制在了$O(M^3)$。由于在SLAM问题中，三维点的数量往往远远大于相机状态的数量：$N \gg M$，MSCKF算法可以达到实时性的要求，效率要高于MonoSLAM。又由于MSCKF保留了一定数量的历史相机状态，而不是尽早地将旧的状态消去，因此误差累积更小，更适合长时间、大尺度的应用。
 
 此外，MSCKF还使用了IMU信息，因此属于VISLAM。MSCKF使用了一般的迭代式IMU积分技术，即直接通过对IMU读数进行积分，得到最新相机状态的先验分布，而将图像特征信息作为观测，经过EKF更新融合视觉信息和IMU信息。MSCKF的算法的框架如下：
 \begin{enumerate}
@@ -17,7 +17,7 @@ VSLAM和VISLAM都需要根据系统的先验估计、传感器观测来对系统
 
 MSCKF的状态窗口包括最新的相机状态和保留在窗口内的部分历史相机状态。在$k$时刻其状态变量定义如下：
 \begin{equation}
-    \bm{X}_k \triangleq
+    \bm{X}_k \doteq
     \left[
         \bm{X}_{\textrm{IMU}_k},
         \prescript{G}{}{\mathrm R}_{C_1},

@@ -6,7 +6,7 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
 
 \section{增量舒尔补算法}
 
-舒尔补虽然可以大幅加速集束优化的求解，但是在标准的集束优化算法中，每一轮迭代重新构建舒尔补方程的过程仍然需要耗费大量的时间。如前面提到的，SLAM问题具有很好的局部性，每一轮求解一般都只有一小部分较新的变量有所更新，如果采用增量式的方法，每一轮迭代时只重新计算这些变量在舒尔补方程中对应的部分，则可以进一步减少计算量。
+舒尔补虽然可以大幅加速集束优化的求解，但是在标准的批量式集束优化算法（batch bundle adjustment）中，每一轮迭代重新构建舒尔补方程的过程仍然需要耗费大量的时间。如前面提到的，SLAM问题具有很好的局部性，每一轮求解一般都只有一小部分较新的变量有所更新，如果采用增量式的方法，每一轮迭代时只重新计算这些变量在舒尔补方程中对应的部分，则可以进一步减少计算量。
 
 \begin{figure}[htb!]
     \centering
@@ -82,8 +82,6 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
     \label{fig:factor_graph_aug}
 \end{figure}
 
-\input{alg/alg:factor_graph_aug.tex}
-
 \begin{figure}[htb!]
     \centering
     \includegraphics[scale=1]{figs/normal_eq_aug.png}
@@ -97,3 +95,16 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
     \caption{更新正规方程}
     \label{fig:normal_eq_update}
 \end{figure}
+
+\input{alg/alg:factor_graph_aug.tex}
+
+\section{线性求解}
+
+通过增量更新得到舒尔补方程\eqref{eq:solve_schur}后，可以快速地求解相机状态的增量。这一部分可以使用任何常用的矩阵分解法，如QR分解、Cholesky分解等。也可以采用迭代式的线性求解方法，比如预处理共轭梯度法（preconditioned conjugate gradient，以下简称PCG）。通常在SLAM问题中，由于变量大多已经处于收敛附近，使用PCG方法并配合\citep{jeong2012pushing}中提出的预处理方法，可以显著提升线性求解的效率。求解完相机状态增量$\bm{\delta}_c$后，还需要进一步通过回代求解三维点状态的增量$\bm{\delta}_p$，如式\eqref{eq:back_sub}。最后得到的总的状态增量$\bm{\delta}$，通过阈值判断其每个分量$\bm{\delta}_i$是否发生了足够大的更新并将发生较大更新的分量更新到状态中：
+\begin{equation}
+    \bm{x}_i \leftarrow \bm{x}_i + \bm{\delta}_i, \quad
+    \forall \left\|\bm{\delta}_i\right\|_{\infty} \geq \varepsilon
+\end{equation}
+进一步地，如果还需要进行下一轮迭代，则将更新量$\bm{\delta}$传递给算法\ref{alg:mark_dirty}，计算新一轮的迭代。
+
+整个增量舒尔补和线性求解的过程均可以基于块状稀疏矩阵实现。相比与稠密矩阵或一般的稀疏矩阵算法，块状稀疏矩阵的计算过程对cache更友好，也更适合使用CPU浮点指令集加速。得益于块状稀疏矩阵的高效，整个增量式集束优化的效率相比批量式集束优化可以有非常大的提升。
