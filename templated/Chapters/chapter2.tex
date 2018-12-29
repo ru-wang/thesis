@@ -1,0 +1,9 @@
+\chapter{基于IMU预积分的惯性导航}\label{ch:vislam}
+
+如上一章中提到的，单目VSLAM系统存在一定的局限性，非常依赖相机的成像质量，并且无法绝对尺度进行观测\citep{jones2011visual}。而在移动AR、自动驾驶、无人机等应用中，为了与场景交互或是提供路径规划，SLAM算法必须鲁棒地提供带尺度信息的位姿估计和运动估计。而且随时可能出现的光照、纹理质量的变化，以及相机快速运动带来的图像模糊，都时刻在挑战着相机跟踪算法的鲁棒性。
+
+近些年来，IMU被广泛地与VSLAM系统结合。不管是使用滤波方法还是非线性优化方法实现的VISLAM系统，对IMU的建模都大同小异，基本集中在两类：一类是类似于MSCKF\citep{mourikis2007multi}、OKVIS\citep{leutenegger2015keyframe}那样传统的迭代式IMU积分，另一类则是使用IMU预积分\citep{forster2017manifold}的方法，如VINS\citep{li2017monocular}。
+
+\input{Chapters/imu_model.tex}  % section : IMU基本模型
+
+\input{Chapters/imu_preint.tex} % section : 基于IMU预积分技术的VISLAM

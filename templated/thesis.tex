@@ -1,0 +1,160 @@
+\documentclass[oneside]{ZJUthesis}
+
+\renewcommand{\algorithmicindent}{2.0em}
+\renewcommand{\algorithmiccomment}[1]{\hfill\{#1\}}
+
+\hypersetup{colorlinks=true}
+
+% 这里几行代码使得目录中的“第几章” 和后面的章节名称不致发生重叠
+\makeatletter
+\renewcommand{\numberline}[1]{
+\settowidth\@tempdimb{#1\hspace{0.5em}}
+\ifdim\@tempdima<\@tempdimb
+  \@tempdima=\@tempdimb
+\fi
+\hb@xt@\@tempdima{\@cftbsnum #1\@cftasnum\hfil}\@cftasnumb}
+\makeatother
+
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 正文字体设定
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\songti
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 论文封面部分
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 中文封面内容
+
+% 中图分类号
+\classification{TM863}
+
+% 单位代码
+\serialnumber{10335}
+
+% 密级，如需密级则将其前“%”去掉
+%\SecretLevel{绝密}
+
+% 学号
+\PersonalID{21621094}
+
+\title{面向视觉-惯性SLAM的通用}
+\titletl{增量式集束调整框架}
+
+%英文题目
+\Etitle{A General Incremental Bundle}
+\Etitletl{Adjustment Framework for}
+\Etitletll{Visual-Inertial SLAM}
+
+% 作者
+\author{王儒}
+\Eauthor{Ru Wang}
+
+\degree{硕士}
+\Edegree{Master of Engineering}
+
+% 导师
+\supervisor{章国锋}
+\Esupervisor{Guofeng Zhang}
+
+% 合作导师，如果有的话，去掉注释，
+%\cpsupervisor{}
+%\Ecpsupervisor{}
+
+% 专业名称
+\major{计算机科学与技术}
+\Emajor{Computer Science and Technology}
+
+% 研究方向
+\researchdm{计算机视觉}
+\Eresearchdm{Computer Vision}
+
+% 所属学院
+\institute{计算机科学与技术学院}
+\Einstitute{College of Computer Science and Technology}
+
+%论文提交日期
+\submitdate{二〇一九年一月十五日}
+\Esubmitdate{2019-1-15}
+
+% 答辨日期
+%\defenddate{2011年11月1日}
+
+% 生成封面
+\makeCoverPage
+
+% 生成英文封面
+\makeECoverPage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 原创声明与版权协议页
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% 生成原创声明与版权协议页
+\makeOSandCPRTpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 论文部分开始
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ZJUfrontmatter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 摘要
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{Chapters/abstract_ch}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 英文摘要
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\input{Chapters/abstract_en}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 目录页
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ZJUcontents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 插图列表
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ZJUListofFigures
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 表格列表
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\ZJUListofTables
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 正文内容部分开始
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ZJUmainmatter
+
+\input{Chapters/chapter1.tex}
+
+\input{Chapters/chapter2.tex}
+
+\input{Chapters/chapter3.tex}
+
+\input{Chapters/chapter4.tex}
+
+\input{Chapters/chapter5.tex}
+
+\ZJUbackmatter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 参考文献
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ZJUthesisbib{thesisbib}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 发表论文目录
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% \input{./Chapters/publications}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 致谢页
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\input{./Chapters/thanks}
+
+
+\end{document}

@@ -1,0 +1,41 @@
+\begin{algorithm}[htb!]
+\caption{Dog-Leg法}
+\begin{algorithmic}
+    \Require 初始信赖域半径$\Delta_0$，初值$\bm{x}_0$
+    \Ensure 优化结果$\bm{x}$
+
+    \State $\Delta \coloneqq \Delta_0, \bm{x} \coloneqq \bm{x}_0$
+    \For{$k = 0 \rightarrow k_{max}$}
+        \State $k \coloneqq k+1$
+        \State 使用 式~\eqref{eq:lls}计算线性化子问题
+        \State 使用 式~\eqref{eq:gn}计算高斯-牛顿迭代步$\bm{\delta}_{gn}$
+        \State 使用 式~\eqref{eq:sd}计算最速下降迭代步$\bm{\delta}_{sd}$
+        \State 使用 式~\eqref{eq:dl}计算Dog-Leg法步长$\bm{\delta}_{dl}$
+
+        \If{\{步长$\bm{\delta}_{dl}$收敛\}}
+            \State 结束优化
+        \EndIf
+
+        \State 计算迭代步质量$\varrho$：
+        \[
+            \varrho = \frac {F(\bm{x})-F(\bm{x}+\bm{\delta}_{dl})}
+                            {L(\bm{0})-L(\bm{\delta}_{dl})}
+        \]
+
+        \If{\{$\varrho > 0.0$\}}
+            \State $\bm{x} \coloneqq \bm{x} + \bm{\delta}_{dl}$
+        \EndIf
+
+        \If{\{$\varrho > \epsilon_0$\}}
+            \State $\Delta \coloneqq \text{fmax}\{\Delta,3\left\|\bm{\delta}_{dl}\right\|\}$
+        \ElsIf{\{$\varrho < \epsilon_1$\}}
+            \State $\Delta \coloneqq \Delta/2$
+        \EndIf
+
+        \If{\{信赖域$\Delta$收敛\}}
+            \State 结束优化
+        \EndIf
+    \EndFor
+\end{algorithmic}
+\label{alg:dogleg}
+\end{algorithm}
