@@ -5,16 +5,6 @@
 
 \hypersetup{colorlinks=true}
 
-% 这里几行代码使得目录中的“第几章” 和后面的章节名称不致发生重叠
-\makeatletter
-\renewcommand{\numberline}[1]{
-\settowidth\@tempdimb{#1\hspace{0.5em}}
-\ifdim\@tempdima<\@tempdimb
-  \@tempdima=\@tempdimb
-\fi
-\hb@xt@\@tempdima{\@cftbsnum #1\@cftasnum\hfil}\@cftasnumb}
-\makeatother
-
 \begin{document}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 正文字体设定
