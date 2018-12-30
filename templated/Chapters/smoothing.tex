@@ -226,26 +226,26 @@ DL法根据当前的信赖域半径$\Delta$和以上求解的两个步长来计�
         \mathrm{P} & \mathrm{W}^\top \\
         \mathrm{W} & \mathrm{C}
     \end{bmatrix}, \quad
-    \bm{\delta} = \begin{bmatrix} \bm{\delta}_p \\ \bm{\delta}_c \end{bmatrix}, \quad
-    \bm{\eta} = \begin{bmatrix} \bm{p} \\ \bm{c} \end{bmatrix}
+    \bm{\delta} = \begin{bmatrix} \bm{\delta}_l \\ \bm{\delta}_c \end{bmatrix}, \quad
+    \bm{\eta} = \begin{bmatrix} \bm{l} \\ \bm{c} \end{bmatrix}
 \end{equation}
 其中$\mathrm{P}$是三维点状态对应的海森矩阵，$\mathrm{C}$是相机状态对应的海森矩阵，$\mathrm{W}$是三维点状态和相机状态的海森矩阵。求解三维点状态和相机状态之前，先通过行变换构建舒尔补方程：
 \begin{equation}
     \left( \mathrm{C}-\mathrm{W}\mathrm{P}^{-1}\mathrm{W}^\top \right)
-    \bm{\delta}_c = \bm{c}-\mathrm{W}\mathrm{P}^{-1}\bm{p}
+    \bm{\delta}_c = \bm{c}-\mathrm{W}\mathrm{P}^{-1}\bm{l}
     \label{eq:schur_complement}
 \end{equation}
 
-记舒尔补矩阵为$\mathrm{S}\doteq\mathrm{C}-\mathrm{W}\mathrm{P}^{-1}\mathrm{W}^\top$，右侧为$\bm{b}\doteq\bm{c}-\mathrm{W}\mathrm{P}^{-1}\bm{p}$。如前面提到的，集束调整问题中的三维点状态数量远多于相机状态数量，故矩阵$\mathrm{S}$的规模远小于$\mathrm{P}$的规模，通过求解下舒尔补方程：
+记舒尔补矩阵为$\mathrm{S}\doteq\mathrm{C}-\mathrm{W}\mathrm{P}^{-1}\mathrm{W}^\top$，右侧为$\bm{b}\doteq\bm{c}-\mathrm{W}\mathrm{P}^{-1}\bm{l}$。如前面提到的，集束调整问题中的三维点状态数量远多于相机状态数量，故矩阵$\mathrm{S}$的规模远小于$\mathrm{P}$的规模，通过求解下舒尔补方程：
 \begin{equation}
     \bm{\delta}_c = \mathrm{S} \:\setminus\: \bm{b}
     \label{eq:solve_schur}
 \end{equation}
 可以快速先得到相机状态的迭代步。而又因为矩阵$\mathrm{P}$通常呈块对角状，其逆矩阵的求解$\mathrm{P}^{-1}$也非常容易，通过变量回代又可以高效地求解剩余的三维点状态的迭代步：
 \begin{equation}
-    \bm{\delta}_p = \mathrm{P}
+    \bm{\delta}_l = \mathrm{P}
     \:\setminus\:
-    \left( \bm{p}-\mathrm{W}^\top\bm{\delta}_c \right)
+    \left( \bm{l}-\mathrm{W}^\top\bm{\delta}_c \right)
     \label{eq:back_sub}
 \end{equation}
 

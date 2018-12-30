@@ -39,13 +39,13 @@
 \centering
 \begin{tabular}[b]{l|cccc}
     \toprule
-    $T_{\text{solve}}$/$Iter.$  &      Cubic &      Venice &    Cathedral \\ \midrule
-    基准Ceres：Schur-QR         & $69$ms/$5$ & $125$ms/$6$ & $3860$ms/$5$ \\
-                                &  $100.0\%$ &   $100.0\%$ &    $100.0\%$ \\ \midrule
-    本文算法：Schur-Cholesky    & $17$ms/$5$ &  $78$ms/$6$ & $2334$ms/$5$ \\
-                                &   $24.6\%$ &    $62.4\%$ &     $60.5\%$ \\ \midrule
-    本文算法：Schur-PCG         & $18$ms/$5$ &  $80$ms/$6$ & $2423$ms/$5$ \\
-                                &   $26.1\%$ &    $64.0\%$ &     $62.8\%$ \\
+    $T_{\text{solve}}$/$Iter.$ &      Cubic & Venice      &    Cathedral \\ \midrule
+    基准Ceres：Schur-QR        & $69$ms/$5$ & $125$ms/$6$ & $3860$ms/$5$ \\
+                               &  $100.0\%$ & $100.0\%$   &    $100.0\%$ \\ \midrule
+    本文算法：Schur-Cholesky   & $17$ms/$5$ & $78$ms/$6$  & $2334$ms/$5$ \\
+                               &   $24.6\%$ & $62.4\%$    &     $60.5\%$ \\ \midrule
+    本文算法：Schur-I-PCG      & $18$ms/$5$ & $80$ms/$6$  & $2423$ms/$5$ \\
+                               &   $26.1\%$ & $64.0\%$    &     $62.8\%$ \\
     \bottomrule
 \end{tabular}
 \end{table}
@@ -60,11 +60,11 @@
 \centering
 \begin{tabular}[b]{l|cccc}
     \toprule $Err_{\text{reproj}}$/
-    $Err_{\text{reproj}}+Err_{\text{IMU}}$ &                 Cubic &                   Venice &               Cathedral \\
+    $Err_{\text{reproj}}+Err_{\text{IMU}}$ &                 Cubic & Venice                   &               Cathedral \\
     （优化前误差）                         & （$2.514\times10^3$） & （$5.641\times10^{-1}$） & （$7.475\times10^{0}$） \\ \midrule
-    基准Ceres：Schur-QR                    &     $5.153\times10^2$ &     $2.996\times10^{-2}$ &    $4.153\times10^{-1}$ \\
-    本文算法：Schur-Cholesky               &     $4.982\times10^2$ &     $3.166\times10^{-2}$ &    $4.246\times10^{-1}$ \\
-    本文算法：Schur-PCG                    &     $5.004\times10^2$ &     $2.996\times10^{-2}$ &    $5.524\times10^{-1}$ \\
+    基准Ceres：Schur-QR                    &     $5.153\times10^2$ & $2.996\times10^{-2}$     &    $4.153\times10^{-1}$ \\
+    本文算法：Schur-Cholesky               &     $4.982\times10^2$ & $3.166\times10^{-2}$     &    $4.246\times10^{-1}$ \\
+    本文算法：Schur-I-PCG                  &     $5.004\times10^2$ & $2.996\times10^{-2}$     &    $5.524\times10^{-1}$ \\
     \bottomrule
 \end{tabular}
 \end{table}
@@ -74,4 +74,4 @@
 
 本章通过在模拟VISLAM数据集Cubic和开源VSLAM数据集上测试对比了本文提出的增量式舒尔补集束调整优化算法和流行的开源Ceres-Solver的求解效率和精度。可以看到在各个数据集上，相比开源的Ceres-Solver，本文提出的基于增量舒尔补的集束调整方法均在保证一定精度的前提下将求解时间减少了$75.4\%$至$36.0\%$不等，显著提升了效率。
 
-值得注意的是，本文提出的集束调整算法仍然具有较高的通用性和可扩展性：除了集束调整问题，也可以求解一般的非线性最小二乘问题；除了提供的Cholesky分解法和PCG方法，用户也可以自定义新的线性求解方法，以供不同场景使用。
+值得注意的是，本文提出的集束调整框架仍然具有较高的通用性和可扩展性：除了集束调整问题，也可以求解一般的非线性最小二乘问题；除了提供的Cholesky分解法和PCG方法，用户也可以自定义新的线性求解方法，以供不同场景使用。

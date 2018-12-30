@@ -10,7 +10,7 @@
 
     \ForAll{三维点状态$\bm{\theta}_i\in{\Theta}_0$}
     \Comment{增广正规方程，如图~\ref{fig:normal_eq_aug}}
-        \State 增广矩阵：$\mathrm{P}$，$\mathrm{W}$，$\bm{p}$
+        \State 增广矩阵：$\mathrm{P}$，$\mathrm{W}$，$\bm{l}$
     \EndFor
 
     \ForAll{相机状态$\bm{\theta}_i\in{\Theta}_0$}
@@ -32,7 +32,7 @@
     \Comment{减去三维点对舒尔补的贡献}
         \[\begin{aligned}
                 \mathrm{S} &\coloneqq \mathrm{S} + \mathrm{W}_i{\mathrm{P}_{ii}}^{-1}\mathrm{W}_i^\top \\
-                \bm{b}     &\coloneqq \bm{b}     + \mathrm{W}_i{\mathrm{P}_{ii}}^{-1}\bm{p}_i
+                \bm{b}     &\coloneqq \bm{b}     + \mathrm{W}_i{\mathrm{P}_{ii}}^{-1}\bm{l}_i
         \end{aligned}\]
     \EndFor
 
@@ -54,7 +54,7 @@
     \Comment{更新三维点对舒尔补的贡献}
         \[\begin{aligned}
                 \mathrm{S} &\coloneqq \mathrm{S} - \mathrm{W}_i{\mathrm{P}_{ii}}^{-1}{\mathrm{W}_i}^\top \\
-                \bm{b}     &\coloneqq \bm{b}     - \mathrm{W}_i{\mathrm{P}_{ii}}^{-1}\bm{p}_i
+                \bm{b}     &\coloneqq \bm{b}     - \mathrm{W}_i{\mathrm{P}_{ii}}^{-1}\bm{l}_i
         \end{aligned}\]
     \EndFor
 

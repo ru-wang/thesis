@@ -1,4 +1,4 @@
-\section{基于IMU预积分技术的VISLAM}
+\section{基于IMU预积分的惯性约束目标函数}
 
 接下来重点介绍IMU预积分技术\citep{forster2017manifold}。与普通基于IMU积分的VISLAM系统不同，IMU预积分使用了更精确的相对运动模型。将IMU观测模型包含三个部分：相对旋转、相对速度、相对平移，可以认为它们是仅关于偏移量的函数。使用以下算法进行IMU预积分，假设需要对$t_i$和$t_j$之间IMU读数进行积分（假设相邻两帧IMU之间时间间隔相同，即$\Delta t_{i,i+1} = \Delta t_{i+1,i+2} = \cdots = \Delta t_{j-1,j} = \Delta t$）：
 
@@ -10,7 +10,7 @@
                 \right) \\
 \bm{v}_j &= \bm{v}_i + \bm{g} \Delta t_{ij} + \sum_{k=i}^{j-1}
 \mathrm{R}_k (\tilde{\bm{a}}_k - \bm{b}_k^a - \bm{n}_k^a) \Delta t \\
-\bm{p}_j &= \bm{p}_i + \sum_{k=i}^{j-1}
+\bm{l}_j &= \bm{l}_i + \sum_{k=i}^{j-1}
                 \left[
                     \bm{v}_k \Delta t +
                     \tfrac{1}{2}\bm{g}\Delta t^2 +
@@ -39,10 +39,10 @@
   \Delta\mathrm{R}_{ik}
   (\tilde{\bm a}_k - \bm{b}_k^a - \bm{n}_k^a) \Delta t \\
   %
-  \Delta\bm{p}_{ij}
+  \Delta\bm{l}_{ij}
   &\doteq \mathrm{R}_i^\top
   \left(
-      \bm{p}_j - \bm{p}_i -
+      \bm{l}_j - \bm{l}_i -
       \bm{v}_i \Delta t_{ij} -
       \tfrac{1}{2} \bm{g} \Delta t_{ij}^2
   \right) \\
@@ -55,7 +55,7 @@
 \end{aligned}\label{eq:raw_int}
 \end{equation}
 
-每一轮优化迭代过后，使用一阶的线性方法对$\Delta\mathrm{R}_{ij}$，$\Delta\bm{p}_{ij}$，$\Delta\bm{v}_{ij}$这三个量进行更新，这样就使得在状态变量随着优化在更新的时候，状态的观测也在不断地向着更准确的方向更新，使得整个观测模型更加精准，这也是预积分工作的最主要贡献。
+每一轮优化迭代过后，使用一阶的线性方法对$\Delta\mathrm{R}_{ij}$，$\Delta\bm{l}_{ij}$，$\Delta\bm{v}_{ij}$这三个量进行更新，这样就使得在状态变量随着优化在更新的时候，状态的观测也在不断地向着更准确的方向更新，使得整个观测模型更加精准，这也是预积分工作的最主要贡献。
 
 \section{预积分项的误差模型}
 
@@ -67,12 +67,12 @@
         \Delta\tilde{\mathrm R}_{ij}(\bm{b}^g_i) \exp(-\delta\bm\phi_{ij}) \\
     \Delta\bm{v}_{ij} &\doteq
         \Delta\tilde{\bm v}_{ij}(\bm{b}^g_i, \bm{b}^a_i) - \delta\bm{v}_{ij} \\
-    \Delta\bm{p}_{ij} &\doteq
-        \Delta\tilde{\bm p}_{ij}(\bm{b}^g_i, \bm{b}^a_i) - \delta\bm{p}_{ij}
+    \Delta\bm{l}_{ij} &\doteq
+        \Delta\tilde{\bm p}_{ij}(\bm{b}^g_i, \bm{b}^a_i) - \delta\bm{l}_{ij}
 \end{aligned}
 \end{equation}
 
-最终可以得到IMU预积分项$\left[\Delta\tilde{\mathrm R}_{ij},\Delta\tilde{\bm v}_{ij},\Delta\tilde{\bm p}_{ij}\right]$和预积分的误差项$\bm{n}_{ij} \doteq \left[\delta\bm\phi_{ij},\delta\bm{v}_{ij},\delta\bm{p}_{ij}\right]$，并且认为这个$9$维的误差也是符合均值为零的高斯分布的。记它的协方差为$\Sigma_{ij}$，即$\bm{n}_{ij} \sim \mathcal{N}\left(\bm{0},\Sigma_{ij}\right)$。而这个协方差，显然是在预积分的过程中通过IMU读数的白噪声累积得来的。因此需要在预积分的过程中根据白噪声的协方差$\bm{n} \doteq \left[\bm{n}^g,\bm{n}^a\right] \sim \mathcal{N}(\bm{0},\mathrm\Sigma_{\bm{n}})$同时也完成白噪声的传递。限于篇幅，白噪声的传递的推导，这里不再给出。
+最终可以得到IMU预积分项$\left[\Delta\tilde{\mathrm R}_{ij},\Delta\tilde{\bm v}_{ij},\Delta\tilde{\bm p}_{ij}\right]$和预积分的误差项$\bm{n}_{ij} \doteq \left[\delta\bm\phi_{ij},\delta\bm{v}_{ij},\delta\bm{l}_{ij}\right]$，并且认为这个$9$维的误差也是符合均值为零的高斯分布的。记它的协方差为$\Sigma_{ij}$，即$\bm{n}_{ij} \sim \mathcal{N}\left(\bm{0},\Sigma_{ij}\right)$。而这个协方差，显然是在预积分的过程中通过IMU读数的白噪声累积得来的。因此需要在预积分的过程中根据白噪声的协方差$\bm{n} \doteq \left[\bm{n}^g,\bm{n}^a\right] \sim \mathcal{N}(\bm{0},\mathrm\Sigma_{\bm{n}})$同时也完成白噪声的传递。限于篇幅，白噪声的传递的推导，这里不再给出。
 
 \section{偏移量的线性修正}
 
@@ -172,10 +172,10 @@
         \tfrac{\partial\Delta\bar{\bm v}_{ij}}{\partial\bm{b}^a_i}
         \delta\bm{b}^a_i
       \right] \\
-  \bm{r}_{\Delta\bm{p}}
+  \bm{r}_{\Delta\bm{l}}
     &\doteq
       \mathrm{R}^\top_i(
-        \bm{p}_j - \bm{p}_i -
+        \bm{l}_j - \bm{l}_i -
         \bm{v}_i \Delta t_{ij} -
         \tfrac{1}{2}\bm{g}\Delta t^2_{ij}) -
       \left[

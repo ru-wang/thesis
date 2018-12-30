@@ -54,7 +54,7 @@
 
 \subsection{增量更新舒尔补}
 
-舒尔补方程中被标记为脏块的矩阵构成了一个线性子系统，对应因子图中的脏子图。如图~\ref{fig:schur_update}所展示的，在增量更新舒尔补的过程中，需要先从舒尔补方程中减去脏子图的贡献，随后重新线性化所有的脏因子，最后重新计算舒尔补。算法~\ref{alg:schur_update}详细描述了这个过程。需要注意的是，在计算舒尔补的过程中会重复用到$\mathrm{W}_i\mathrm{P}_{ii}^{-1}\mathrm{W}_i^\top$，$\mathrm{W}_i\mathrm{P}_{ii}^{-1}\bm{p}_i$，$\mathrm{J}_j^\top\mathrm{J}_j$，$\mathrm{J}_j^\top\bm{f}_j$，需要将这些中间项缓存下来，避免重复计算。
+舒尔补方程中被标记为脏块的矩阵构成了一个线性子系统，对应因子图中的脏子图。如图~\ref{fig:schur_update}所展示的，在增量更新舒尔补的过程中，需要先从舒尔补方程中减去脏子图的贡献，随后重新线性化所有的脏因子，最后重新计算舒尔补。算法~\ref{alg:schur_update}详细描述了这个过程。需要注意的是，在计算舒尔补的过程中会重复用到$\mathrm{W}_i\mathrm{P}_{ii}^{-1}\mathrm{W}_i^\top$，$\mathrm{W}_i\mathrm{P}_{ii}^{-1}\bm{l}_i$，$\mathrm{J}_j^\top\mathrm{J}_j$，$\mathrm{J}_j^\top\bm{f}_j$，需要将这些中间项缓存下来，避免重复计算。
 
 \input{Chapters/alg:schur_update.tex}
 

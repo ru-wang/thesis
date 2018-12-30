@@ -13,7 +13,7 @@
     \Comment{减去三维点对舒尔补的贡献}
         \[\begin{aligned}
                 \mathrm{S} &\coloneqq \mathrm{S} + \mathrm{W}_i{\mathrm{P}_{ii}}^{-1}\mathrm{W}_i^\top \\
-                \bm{b}     &\coloneqq \bm{b}     + \mathrm{W}_i{\mathrm{P}_{ii}}^{-1}\bm{p}_i
+                \bm{b}     &\coloneqq \bm{b}     + \mathrm{W}_i{\mathrm{P}_{ii}}^{-1}\bm{l}_i
         \end{aligned}\]
     \EndFor
 
@@ -40,7 +40,7 @@
     \Comment{更新三维点对舒尔补的贡献}
         \[\begin{aligned}
                 \mathrm{S} &\coloneqq \mathrm{S} - \mathrm{W}_i{\mathrm{P}_{ii}}^{-1}{\mathrm{W}_i}^\top \\
-                \bm{b}     &\coloneqq \bm{b}     - \mathrm{W}_i{\mathrm{P}_{ii}}^{-1}\bm{p}_i
+                \bm{b}     &\coloneqq \bm{b}     - \mathrm{W}_i{\mathrm{P}_{ii}}^{-1}\bm{l}_i
         \end{aligned}\]
     \EndFor
 
