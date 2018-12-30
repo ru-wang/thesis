@@ -7,3 +7,7 @@
 \input{Chapters/imu_model.tex}  % section : IMU基本模型
 
 \input{Chapters/imu_preint.tex} % section : 基于IMU预积分技术的VISLAM
+
+\section{本章小结}
+
+本章详细介绍了IMU传感器的基本模型，包括噪声模型和运动模型，并给出了基于IMU预积分方法的VISLAM基本原理。如前面提到的，由IMU预积分提供的观测可以和一般常用的VSLAM的视觉观测进行联合优化。本文提出的增量式舒尔补基数调整提供了基于IMU预积分的目标函数将连同重投影误差目标函数的实现。

@@ -81,6 +81,7 @@ DSO（Direct Sparse Odometry）\citep{engel2018direct}是目前最先进的直�
 \begin{figure}[htb!]
     \centering
     \includegraphics[width=.8\textwidth]{Pictures/sparse_pattern.png}
+    \setcitestyle{sort&compress,longnamesfirst,square,numbers}
     \caption{信息矩阵稀疏结构\citep{kaess2008isam}：左图代表按照一般的消元顺序得到的平方根信息矩阵，右图代表先使用COLAMD算法选择一个较优的消元顺序，然后得到的平方根信息矩阵。可见，变量消去顺序对矩阵分解产生的填充现象有巨大影响。}
     \label{fig:fill_in}
 \end{figure}
@@ -107,7 +108,7 @@ DSO（Direct Sparse Odometry）\citep{engel2018direct}是目前最先进的直�
     通常IMU的频率要远高于相机获取图像的帧率，因此两种传感器之间的时间戳对齐也是VISLAM前端跟踪一个较为挑战的问题。一般可以采用线性插值的方法，以图像的时间戳为准，对IMU的读数进行插值。插值法可以得到同步后的两个图像帧之间的一组IMU读数组成的窗口，当接收到图像的时候，需要对图像进行预处理，同时计算IMU的相关积分。IMU方面，使用IMU预积分通常精度要好于传统的迭代式积分。
 
     \item \textbf{后端优化模块}：
-        后端优化模块可以采用上节提到过的包含边缘化的局部窗口优化的方法或全局优化。也可以在后端维护一个较长的状态窗口，每当有新的状态加入到窗口中时触发非线性优化求解。集束调整可以采用前面介绍的一些方法来加速：无结构的位姿图优化、关键帧优化、利用全局优化的局部性开发高效的增量优化算法等。 
+        后端优化模块可以采用上节提到过的包含边缘化的局部窗口优化的方法或全局优化。也可以在后端维护一个较长的状态窗口，每当有新的状态加入到窗口中时触发非线性优化求解。集束调整可以采用前面介绍的一些方法来加速：无结构的位姿图优化、关键帧优化、利用全局优化的局部性开发高效的增量优化算法等。
 
         在基于关键帧的VSLAM中，通常只需要根据图像本身来考虑关键帧的筛选，比如特征是否丰富、特征分布是否合理，与其他帧能否形成足够的距离和共视关系等。在窗口维护的时候也有不同的做法：顺序滑动，或用最新的状态替换窗口中最新的状态等。离开窗口的状态则以边缘化的方式消去，其结果需要作为先验信息加入到后续优化中。
 
@@ -117,7 +118,7 @@ DSO（Direct Sparse Odometry）\citep{engel2018direct}是目前最先进的直�
 
     \item \textbf{回路闭合模块}：
     回路闭合模块可以在检测到回路时调用全局优化，消除长时间跟踪的积累误差。但是出于性能上的考虑，全局优化的不适合频繁地调用。一种策略是在检测到回路闭合之后，将匹配到的历史关键帧加入到当前的滑动窗口中，并设置为固定的变量。这样，窗口内的集束调整就成了以历史关键帧为条件的条件状态估计。另一方面，又可以在额外维护一个全局的集束调整模块，以较低的频率运行以消除地图的误差，以及利用Essential Graph或者位姿图优化进一步达到节省计算，同时不会引入很大的误差的目的。
-    
+
 \end{itemize}
 
 图~\ref{fig:vins_model}展示了VINS-Mobile中对VISLAM框架的模块划分，具有代表性：
@@ -125,6 +126,7 @@ DSO（Direct Sparse Odometry）\citep{engel2018direct}是目前最先进的直�
 \begin{figure}[htb!]
     \centering
     \includegraphics[width=\textwidth]{Pictures/vins_model.png}
+    \setcitestyle{sort&compress,longnamesfirst,square,numbers}
     \caption{VINS-Mobile\citep{li2017monocular}的模块：逻辑上被划分为初始化、前端视觉惯性跟踪、后端非线性优化以及回路闭合四个模块。}
     \label{fig:vins_model}
 \end{figure}

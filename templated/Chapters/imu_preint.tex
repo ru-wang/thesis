@@ -127,6 +127,7 @@
 \begin{figure}[htb!]
     \centering
     \includegraphics[width=.5\textwidth]{Pictures/okvis.png}
+    \setcitestyle{sort&compress,longnamesfirst,square,numbers}
     \caption{OKVIS因子图示例图\citep{leutenegger2015keyframe}}
     \label{fig:okvis}
 \end{figure}
@@ -142,6 +143,7 @@
 \begin{figure}[htb!]
     \centering
     \includegraphics[width=.6\textwidth]{Pictures/preint.png}
+    \setcitestyle{sort&compress,longnamesfirst,square,numbers}
     \caption{IMU预积分因子图示例\citep{forster2017manifold}}
     \label{fig:preint}
 \end{figure}
@@ -184,3 +186,5 @@
         \delta\bm{b}^a_i \right]
 \end{aligned}
 \end{equation}
+
+得到以上所示的IMU预积分目标函数，即可将IMU部分的观测和VSLAM中常用重投影误差目标函数、光度误差目标函数等进行联合优化，实现VISLAM。

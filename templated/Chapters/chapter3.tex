@@ -108,3 +108,15 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
 进一步地，如果还需要进行下一轮迭代，则将更新量$\bm{\delta}$传递给算法~\ref{alg:mark_dirty}，计算新一轮的迭代。
 
 整个增量舒尔补和线性求解的过程均可以基于块状稀疏矩阵实现。相比与稠密矩阵或一般的稀疏矩阵算法，块状稀疏矩阵的计算过程对cache更友好，也更适合使用CPU浮点指令集加速。得益于块状稀疏矩阵的高效，整个增量式集束调整的效率相比批量式集束调整可以有非常大的提升。
+
+\section{本章小结}
+
+本章详细介绍了基于增量式舒尔补的集束调整优化算法，一组增量式集束调整优化的流程总结如下：
+\begin{enumerate}
+    \item 根据因子图，采用传统方法构建舒尔补并使用Cholesky分解或PCG方法求解首轮迭代；
+    \item\label{it:2} 使用算法~\ref{alg:mark_dirty}标记因子图和舒尔补方程需要更新的部分；
+    \item\label{it:3} 使用算法~\ref{alg:schur_update}更新舒尔补；
+    \item\label{it:4} 使用Cholesky分解或PCG方法求解舒尔补方程；
+    \item 重复\ref{it:2}至\ref{it:4}直到收敛；
+    \item 当新增了因子或状态时，使用算法~\ref{alg:factor_graph_aug}进行增广，并重新从\ref{it:2}开始新一组优化
+\end{enumerate}

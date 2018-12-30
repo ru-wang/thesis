@@ -3,8 +3,6 @@
 \renewcommand{\algorithmicindent}{2.0em}
 \renewcommand{\algorithmiccomment}[1]{\hfill\{#1\}}
 
-\hypersetup{colorlinks=true}
-
 \begin{document}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 正文字体设定
@@ -64,7 +62,7 @@
 \Einstitute{College of Computer Science and Technology}
 
 %论文提交日期
-\submitdate{二〇一九年一月十五日}
+%\submitdate{二〇一九年一月十五日}
 %\Esubmitdate{2019-1-15}
 
 % 答辨日期
@@ -104,7 +102,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 插图列表
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+{
+\setcitestyle{sort&compress,longnamesfirst,square,numbers}
 \ZJUListofFigures
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 表格列表
