@@ -4,114 +4,13 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
 
 例如在图~\ref{fig:sparse_matrix}中，正规方程的三维点部分（左上角部分）高度稀疏，呈对角块状，在求解时应该优先考虑这一部分的分解。iSAM2算法需要依赖COLAMD\citep{davis2004algorithm}算法来被动地检测矩阵分解的顺序，一方面需要额外的计算时间，另一方面也不一定能得到比经验更好的结果。
 
-\section{增量舒尔补算法}
+\input{Chapters/ischur_update.tex}
 
-舒尔补虽然可以大幅加速集束调整的求解，但是在标准的批量式集束调整算法（batch bundle adjustment）中，每一轮迭代重新构建舒尔补方程的过程仍然需要耗费大量的时间。如前面提到的，SLAM问题具有很好的局部性，每一轮求解一般都只有一小部分较新的变量有所更新，如果采用增量式的方法，每一轮迭代时只重新计算这些变量在舒尔补方程中对应的部分，则可以进一步减少计算量。
-
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[scale=.7]{Pictures/factor_graph.png}
-    \caption{因子图}
-    \label{fig:factor_graph}
-\end{figure}
-
-如图~\ref{fig:factor_graph}是一个常见集束调整问题的因子图示例，其对应的正规方程具有如图~\ref{fig:normal_eq}所示的稀疏结构。按照 式\eqref{eq:schur_complement}构建相机部分方程的舒尔补，依次迭代计算每一个三维点状态对应的舒尔补部分，并累加到图~\ref{fig:reduced_sys}中的高亮部分所示的舒尔补中。图~\ref{fig:schur_complement}展示了计算舒尔补的第一次迭代。
-
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[scale=1]{Pictures/normal_eq.png}
-    \caption{正规方程：左上角块对角矩阵部分对应三维点状态$1$至$6$的信息矩阵$\mathrm{P}$，右下角部分为相机状态$1$至$5$对应的信息矩阵$\mathrm{C}$，左下角和右上角为矩阵$\mathrm{W}$和$\mathrm{W}^\top$；中间列向量从上至下依次对应三维点状态$1$至$6$和相机状态$1$至$5$的迭代步；右侧部分从上至下依次对应三维点状态$1$至$6$和相机状态$1$至$5$。}
-    \label{fig:normal_eq}
-\end{figure}
-
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[scale=1]{Pictures/reduced_sys.png}
-    \caption{舒尔补：高亮部分为相机状态对应舒尔补方程，其余部分为原方程。}
-    \label{fig:reduced_sys}
-\end{figure}
-
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[width=\textwidth]{Pictures/schur_complement.png}
-    \caption{计算舒尔补的一次迭代：从左上角开始依次迭代计算每一个三维点对应的舒尔补部分，并累加到右下角相机部分中。}
-    \label{fig:schur_complement}
-\end{figure}
-
-\section{标记脏子图}
-
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[scale=.7]{Pictures/factor_graph_dirty.png}
-    \caption{因子图待更新部分：相机状态$5$为脏变量；与其直接相连的因子为脏因子；相机状态$4$和三维点状态$6$为只有梯度发生了变化的脏变量。这些节点构成了一个脏子图。}
-    \label{fig:factor_graph_dirty}
-\end{figure}
-
-增量更新舒尔补的方法关键在于尽可能地复用上一次迭代的结果，只针对性地计算舒尔补方程中变化较大的变量对应的部分。以因子图~\ref{fig:factor_graph}为例，假设只有相机状态$5$有较大的更新，则先将其标记为脏变量。在因子图中，只有与脏变量直接相连的因子需要标记为脏因子，如图~\ref{fig:factor_graph_dirty}所示。需要注意的是，尽管相机状态$5$和三维点状态$6$的值并未发生足够大的改变，但是由于与之相连的部分因子被标记为脏因子，因此也需要更新这些因子关于它们的雅各比矩阵。这些脏变量和脏因子共同组成了一个脏子图，对应地，图~\ref{fig:normal_eq_dirty}高亮标示了舒尔补方程中需要更新的脏块。算法~\ref{alg:mark_dirty}详细说明了如何通过一个简单的宽度优先搜索标记出因子图中的脏子图。
-
-\input{Chapters/alg:mark_dirty}
-
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[scale=1]{Pictures/normal_eq_dirty.png}
-    \caption{图~\ref{fig:factor_graph_dirty}对应的舒尔补方程中的脏块：相机状态$4$、$5$和三维点状态$6$构成的线性子系统。}
-    \label{fig:normal_eq_dirty}
-\end{figure}
-
-\section{增量更新舒尔补}
-
-舒尔补方程中被标记为脏块的矩阵构成了一个线性子系统，对应因子图中的脏子图。如图~\ref{fig:schur_update}所展示的，在增量更新舒尔补的过程中，需要先从舒尔补方程中减去脏子图的贡献，随后重新线性化所有的脏因子，最后重新计算舒尔补。算法~\ref{alg:schur_update}详细描述了这个过程。需要注意的是，在计算舒尔补的过程中会重复用到$\mathrm{W}_i\mathrm{P}_{ii}^{-1}\mathrm{W}_i^\top$，$\mathrm{W}_i\mathrm{P}_{ii}^{-1}\bm{p}_i$，$\mathrm{J}_j^\top\mathrm{J}_j$，$\mathrm{J}_j^\top\bm{f}_j$，需要将这些中间项缓存下来，避免重复计算。
-
-\input{Chapters/alg:schur_update}
-
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[width=\textwidth]{Pictures/schur_update.png}
-    \caption{更新舒尔补}
-    \label{fig:schur_update}
-\end{figure}
-
-\section{状态增广}
-
-除了状态变量发生较大变化的时候需要更新因子图和舒尔补方程，集束调整过程中，如果有新的状态或因子加入，也需要对因子图进行增广，并对和舒尔补方程进行相应更新。实际上，这个过程也可以认为是算法~\ref{alg:schur_update}的一个特例。如图~\ref{fig:factor_graph_aug}，新加入的状态通过新的因子与原因子图中相关联的部分状态共同构成了一个子图，将这个子图标记为脏子图，即可使用算法~\ref{alg:schur_update}进行更新。算法~\ref{alg:factor_graph_aug}给出了详细的过程，为了提高效率，因子图的增广和舒尔补方程的更新会被同时执行。
-
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[scale=.7]{Pictures/factor_graph_aug.png}
-    \caption{增广因子图}
-    \label{fig:factor_graph_aug}
-\end{figure}
-
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[scale=1]{Pictures/normal_eq_aug.png}
-    \caption{增广正规方程}
-    \label{fig:normal_eq_aug}
-\end{figure}
-
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[scale=1]{Pictures/normal_eq_update.png}
-    \caption{更新正规方程}
-    \label{fig:normal_eq_update}
-\end{figure}
-
-\input{Chapters/alg:factor_graph_aug}
-
-\section{线性求解}
-
-通过增量更新得到舒尔补方程\eqref{eq:solve_schur}后，可以快速地求解相机状态的增量。这一部分可以使用任何常用的矩阵分解法，如QR分解、Cholesky分解等。也可以采用迭代式的线性求解方法，比如预处理共轭梯度法（preconditioned conjugate gradient，以下简称PCG）。通常在SLAM问题中，由于变量大多已经处于收敛附近，使用PCG方法并配合\citep{jeong2012pushing}中提出的预处理方法，可以显著提升线性求解的效率。求解完相机状态增量$\bm{\delta}_c$后，还需要进一步通过回代求解三维点状态的增量$\bm{\delta}_p$，如 式\eqref{eq:back_sub}。最后得到的总的状态增量$\bm{\delta}$，通过阈值判断其每个分量$\bm{\delta}_i$是否发生了足够大的更新并将发生较大更新的分量更新到状态中：
-\begin{equation}
-    \bm{x}_i \leftarrow \bm{x}_i + \bm{\delta}_i, \quad
-    \forall \left\|\bm{\delta}_i\right\|_{\infty} \geq \varepsilon
-\end{equation}
-进一步地，如果还需要进行下一轮迭代，则将更新量$\bm{\delta}$传递给算法~\ref{alg:mark_dirty}，计算新一轮的迭代。
-
-整个增量舒尔补和线性求解的过程均可以基于块状稀疏矩阵实现。相比与稠密矩阵或一般的稀疏矩阵算法，块状稀疏矩阵的计算过程对cache更友好，也更适合使用CPU浮点指令集加速。得益于块状稀疏矩阵的高效，整个增量式集束调整的效率相比批量式集束调整可以有非常大的提升。
+\input{Chapters/linear_solver.tex}
 
 \section{增量式集束调整框架}
 
-为了保证通用性，开源的通用求解器的计算流程通常为如图~\ref{fig:framework}所示
+为了保证通用性，本文构建如图~\ref{fig:framework}所示的通用求解器的框架：
 
 \begin{figure}[htb!]
     \centering
@@ -120,32 +19,73 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
     \label{fig:framework}
 \end{figure}
 
+该框架的任意一个部分均可自定义实现，也可以采用内置的算法，具有很好的通用性和扩展性。表~\ref{tab:comp}展示了本文提出的增量式集束调整框架和其他增量式优化算法的对比
+
 {
 \linespread{1}
-\begin{table}[htb!]
-\zihao{5}
-\caption{增量式集束优化求解器对比}
-\label{tab:dataset}
+\begin{table}[H]
+\zihao{6}
+\caption{增量式集束优化求解器对比：加粗显示了不符合增量操作的部分}
+\label{tab:comp}
 \centering
-\begin{tabular}{l|cccc}
+\begin{tabular}{l|p{.2\textwidth} p{.2\textwidth} p{.2\textwidth} p{.2\textwidth}}
     \toprule
-    求解器    & 本文提出的框架 & ICE-BA & SLAM++ & iSAM2 \\ \midrule
-    线性化     &       50 &        163 &          49 &                789 \\
-    线性求解    &       11 &       8366 &           0 &              20271 \\
-    状态更新 &       92 &      57957 &           0 &             422163 \\
+    求解器     & 本文提出的框架
+               & ICE-BA
+               & SLAM++
+               & iSAM2
+               \\ \midrule
+    非线性部分 & a）三维点和相机状态分别成组
+               & a）三维点和相机状态分别成组
+               & a）三维点和相机状态分别成组
+               & a）使用CCOLAMD对变量进行排序
+               \\
+               & b）根据构建舒尔补构建PBT
+               &
+               & b）相机部分使用COLAMD排序
+               & b）通过消元构建贝叶斯树
+               \\ \midrule
+    线性化     & a）部分线性化
+               & a）部分线性化
+               & a）部分线性化
+               & a）根据贝叶斯树进行即时线性化
+               \\
+               & b）根据脏子图增量更新舒尔补
+               & b）根据脏变量更新舒尔补
+               & b）根据脏变量更新舒尔补
+               & b）更新平方根信息矩阵
+               \\ \midrule
+    线性求解   & a）\textbf{Cholesy分解或增量I-PCG求解舒尔补方程}
+               & a）\textbf{I-PCG求解舒尔补方程}
+               & a）\textbf{Cholesky分解求解舒尔补方程}
+               & a）求解贝叶斯树根节点变量
+               \\
+               & b）根据PBT增量回代求解三维点
+               & b）\textbf{完整回代求解三维点}
+               & b）\textbf{完整回代求解三维点}
+               & b）根据贝叶斯树增量回代求解剩余变量
+               \\ \midrule
+    变量更新   & 标记脏变量
+               & 标记脏变量
+               & 标记脏变量
+               & 标记脏变量
+               \\
     \bottomrule
 \end{tabular}
 \end{table}
 }
 
+需要注意的是，只有所有模块均符合增量操作的求解器才是完全增量的算法。而I-PCG仅仅是提高了收敛效率而没有降低时间复杂度，因此和Cholesky分解法一样，不属于增量操作。
+
 \section{本章小结}
 
 本章详细介绍了基于增量式舒尔补的集束调整优化算法，一组增量式集束调整优化的流程总结如下：
 \begin{enumerate}
-    \item 根据因子图，采用传统方法构建舒尔补并使用Cholesky分解或PCG方法求解首轮迭代；
+    \item 根据因子图，采用传统方法构建舒尔补并使用Cholesky分解或PCG方法求解首轮迭代，并构建PBT；
     \item\label{it:2} 使用算法~\ref{alg:mark_dirty}标记因子图和舒尔补方程需要更新的部分；
     \item\label{it:3} 使用算法~\ref{alg:schur_update}更新舒尔补；
-    \item\label{it:4} 使用Cholesky分解或PCG方法求解舒尔补方程；
-    \item 重复\ref{it:2}至\ref{it:4}直到收敛；
-    \item 当新增了因子或状态时，使用算法~\ref{alg:factor_graph_aug}进行增广，并重新从\ref{it:2}开始新一组优化
+    \item\label{it:4} 使用Cholesky分解或I-PCG方法求解舒尔补方程；
+    \item\label{it:5} 基于PBT推断进行回代求解三维点状态；
+    \item 重复步骤~\ref{it:2}至步骤~\ref{it:5}直到收敛；
+    \item 当新增了因子或状态时，使用算法~\ref{alg:factor_graph_aug}进行增广，并重新从步骤~\ref{it:2}开始新一组优化
 \end{enumerate}
