@@ -109,6 +109,35 @@ iSAM2算法\cite{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用
 
 整个增量舒尔补和线性求解的过程均可以基于块状稀疏矩阵实现。相比与稠密矩阵或一般的稀疏矩阵算法，块状稀疏矩阵的计算过程对cache更友好，也更适合使用CPU浮点指令集加速。得益于块状稀疏矩阵的高效，整个增量式集束调整的效率相比批量式集束调整可以有非常大的提升。
 
+\section{增量式集束调整框架}
+
+为了保证通用性，开源的通用求解器的计算流程通常为如图~\ref{fig:framework}所示
+
+\begin{figure}[htb!]
+    \centering
+    \includegraphics[scale=.5]{Pictures/framework.png}
+    \caption{通用集束调整框架求解流程}
+    \label{fig:framework}
+\end{figure}
+
+{
+\linespread{1}
+\begin{table}[htb!]
+\zihao{5}
+\caption{增量式集束优化求解器对比}
+\label{tab:dataset}
+\centering
+\begin{tabular}{l|cccc}
+    \toprule
+    求解器    & 本文提出的框架 & ICE-BA & SLAM++ & iSAM2 \\ \midrule
+    线性化     &       50 &        163 &          49 &                789 \\
+    线性求解    &       11 &       8366 &           0 &              20271 \\
+    状态更新 &       92 &      57957 &           0 &             422163 \\
+    \bottomrule
+\end{tabular}
+\end{table}
+}
+
 \section{本章小结}
 
 本章详细介绍了基于增量式舒尔补的集束调整优化算法，一组增量式集束调整优化的流程总结如下：
