@@ -3,6 +3,14 @@
 \renewcommand{\algorithmicindent}{2.0em}
 \renewcommand{\algorithmiccomment}[1]{\hfill\{#1\}}
 
+\newcommand*{\citen}[1]{
+  \begingroup
+    \romannumeral-`\x % remove space at the beginning of \setcitestyle
+    \setcitestyle{sort&compress,longnamesfirst,square,numbers}
+    \cite{#1}
+  \endgroup
+}
+
 \begin{document}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 正文字体设定
