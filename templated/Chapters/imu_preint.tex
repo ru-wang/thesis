@@ -122,7 +122,7 @@
 
 \section{非线性优化}
 
-基于迭代式IMU积分的VISLAM中，IMU项参与优化的方式一般比较直接——使用IMU积分得到状态先验，再和视觉观测融合，反复迭代。例如OKVIS中的非线性优化（如图~\ref{fig:okvis}~是OKVIS优化的因子图）。
+基于迭代式IMU积分的VISLAM中，IMU项参与优化的方式一般比较直接——使用IMU积分得到状态先验，再和视觉观测融合，反复迭代。例如OKVIS中的非线性优化（如图~\ref{fig:okvis}是OKVIS优化的因子图）。
 
 \begin{figure}[htb!]
     \centering
@@ -132,7 +132,7 @@
     \label{fig:okvis}
 \end{figure}
 
-和大部分的SLAM系统一样，IMU预积分技术的后端优化也是基于非线性最小二乘。它的能量函数同样包括基本的视觉观测项和IMU预积分项（见图~\ref{fig:preint}~），形式上没有区别，区别仅在IMU部分的能量：
+和大部分的SLAM系统一样，IMU预积分技术的后端优化也是基于非线性最小二乘。它的能量函数同样包括基本的视觉观测项和IMU预积分项（见图~\ref{fig:preint}），形式上没有区别，区别仅在IMU部分的能量：
 \begin{equation}\label{eq:gtsam_res}
     \bm{\mathcal X}^\star =
         \arg\mathop{\min}_{\bm{\mathcal X}}

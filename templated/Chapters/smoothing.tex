@@ -16,7 +16,7 @@
     \label{fig:isam_factor_graph}
 \end{figure}
 
-图~\ref{fig:isam_factor_graph}展示了一类常见的因子图结构。按照图示的例子，一个SLAM问题中可能存在的约束有状态变量的先验约束$p$，相邻状态之间的相对位姿约束$u_1 \dots u_n$，非相邻状态之间的回路闭合约束$c_1,c_2$以及视觉观测约束$m_1 \dots m_4$等。而求解完整集束调整的过程就相当于最大化整个因子图中的所有约束的集合$\mathcal{Z}$关于所有状态集合$\mathcal{X}~$的联合条件概率：
+图~\ref{fig:isam_factor_graph}展示了一类常见的因子图结构。按照图示的例子，一个SLAM问题中可能存在的约束有状态变量的先验约束$p$，相邻状态之间的相对位姿约束$u_1 \dots u_n$，非相邻状态之间的回路闭合约束$c_1,c_2$以及视觉观测约束$m_1 \dots m_4$等。而求解完整集束调整的过程就相当于最大化整个因子图中的所有约束的集合$\mathcal{Z}$关于所有状态集合$\mathcal{X}$的联合条件概率：
 \begin{equation}
     P(\mathcal{Z}|\mathcal{X}) = \prod_{f_i\in\mathcal{Z}} P(f_i(\mathcal{X}_i))
 \end{equation}
@@ -80,11 +80,11 @@
 \end{equation}
 其中$\bm{\eta}=-\bm{g}(\bm{x})$。使用$\bm{\delta}$更新变量：$\bm{x}\leftarrow\bm{x}+\bm{\delta}$。式\eqref{eq:linsys}通常称为正规方程（normal equation），如上求解非线性最小二乘的方法则为正规方程法。线性的问题中，矩阵$\mathrm{H}(\bm{x})$至少为半正定矩阵, 给定任意初值$\bm{x}$（这里选择了初值为$\bm{0}$）只需一步就可解得式\eqref{eq:nls}的全局最优解。而对于非线性的情况，则需要多次迭代才能解得局部最优解。
 
-\subsection{高斯-牛顿法}\label{sec:gn}
+\subsubsection*{高斯-牛顿法}
 
-对于非线性最小二乘问题，牛顿法中计算函数$F(\cdot)$的准确海森矩阵$\mathrm{H}$的代价往往很大，甚至没有闭解。一些算法会寻求使用近似方法计算每次迭代的海森矩阵，比如拟牛顿法\citep{tingleff2004methods}（Qausi-Newton method）。拟牛顿法适用于一般的最小化问题，而对于非线性最小二乘问题，通常可以高斯-牛顿法（Gauss-Newton method）求解。高斯-牛顿法是用于求解非线性最小二乘问题的经典迭代算法，也是众多其他迭代算法的基础。
+对于非线性最小二乘问题，牛顿法中计算函数$F(\cdot)$的准确海森矩阵$\mathrm{H}$的代价往往很大，甚至没有闭解。一些算法会寻求使用近似方法计算每次迭代的海森矩阵，比如拟牛顿法\citep{tingleff2004methods}（Qausi-Newton method）。拟牛顿法适用于一般的最小化问题，而对于非线性最小二乘问题，通常可以高斯-牛顿法（Gauss-Newton，简称GN）求解。GN法是用于求解非线性最小二乘问题的经典迭代算法，也是众多其他迭代算法的基础。
 
-依然考虑非线性最小二乘问题\eqref{eq:nls}，使用高斯-牛顿法迭代求解，首先要给定变量的初值$\bm{x}=\bm{x}_0$。对其在当前点处进行泰勒展开，并忽略高阶项，可得目标函数$\bm{f}(\cdot)$在$\bm{x}$处的线性近似：
+依然考虑非线性最小二乘问题\eqref{eq:nls}，使用GN法迭代求解，首先要给定变量的初值$\bm{x}=\bm{x}_0$。对其在当前点处进行泰勒展开，并忽略高阶项，可得目标函数$\bm{f}(\cdot)$在$\bm{x}$处的线性近似：
 \begin{equation}
     \bm{f}(\bm{x}+\bm{\delta}) \simeq \bm{f}(\bm{x}) + \mathrm{J}\bm{\delta}
 \end{equation}
@@ -110,53 +110,22 @@
     \bm{\eta}       = -\mathrm{J}^\top\bm{f}(\bm{x})
     \label{eq:normal_eq}
 \end{equation}
-再求解，得到高斯-牛顿法一次迭代的结果：
+再求解，得到GN法一次迭代的结果：
 \begin{equation}
     \bm{\delta}_{gn} = \mathrm{H}_{gn} \:\setminus\: \bm{\eta}
     \label{eq:gn}
 \end{equation}
 将此结果更新至变量：$\bm{x}\leftarrow\bm{x}+\bm{\delta}$，然后不断重复以上过程，直至结果收敛。
 
-式\eqref{eq:normal_eq}和\eqref{eq:linsys}的形式类似，也可以认为高斯-牛顿法和牛顿法的最大区别就是高斯-牛顿法使用了$\mathrm{J}^\top\mathrm{J}$来近似海森矩阵。
+式\eqref{eq:normal_eq}和\eqref{eq:linsys}的形式类似，也可以认为GN法和牛顿法的最大区别就是GN法使用了$\mathrm{J}^\top\mathrm{J}$来近似海森矩阵。
 
-\subsection{莱文贝格-马夸特方法}
+\subsubsection*{莱文贝格-马夸特方法}
 
-除了高斯-牛顿法之外，还有一种经典的求解非线性最小二乘优化的算法：莱文贝格-马夸特（Levenberg-Marquardt，简称LM）法。它也被认为是带有阻尼因子的高斯-牛顿法，也是信赖域方法（trust region method）的前身\citep{jorge2006numerical}。
+除了GN法之外，还有一种经典的求解非线性最小二乘优化的算法：莱文贝格-马夸特（Levenberg-Marquardt，简称LM）法。它也被认为是带有阻尼因子的GN法，也是信赖域方法（trust region method）的前身\citep{jorge2006numerical}。
 
-前面提到，一般的纯视觉的SLAM算法中，尺度是不可观测的，也就是说VSLAM的状态估计中，对全局所有的三维点坐标和相机位置进行统一的缩放，不会引起重投影误差的改变（在不考虑数值误差的情况下）。从求解VSLAM集束调整问题的角度来看，这一性质造成了在直接使用高斯-牛顿法时海森矩阵的秩亏现象，即矩阵$\mathrm{J}^\top\mathrm{J}$为半正定的情况。此时直接使用矩阵分解求逆的方法求解线性最小二乘子问题就会得到数值不稳定的结果，比如解得的步长在某个方向过大等。
+前面提到，一般的纯视觉的SLAM算法中，尺度是不可观测的，也就是说VSLAM的状态估计中，对全局所有的三维点坐标和相机位置进行统一的缩放，不会引起重投影误差的改变（在不考虑数值误差的情况下）。从求解VSLAM集束调整问题的角度来看，这一性质造成了在直接使用GN法时海森矩阵的秩亏现象，即矩阵$\mathrm{J}^\top\mathrm{J}$为半正定的情况。此时直接使用矩阵分解求逆的方法求解线性最小二乘子问题就会得到数值不稳定的结果，比如解得的步长在某个方向过大等。
 
-\subsubsection*{莱文贝格法}
-
-针对这一情况，莱文贝格在基础的高斯-牛顿法中引入了对迭代步长的直接约束，将原先每次迭代的线性最小二乘子问题改写为：
-\begin{equation}
-    \mathop{\min}_{\bm{\delta}} \tfrac{1}{2}
-    \left(
-        \Vert \bm{f}(\bm{x}) + \mathrm{J}\bm{\delta} \Vert^2 +
-        \mu \Vert \bm{\delta} \Vert^2
-    \right), \quad \mu > 0
-\end{equation}
-这样一来，原先高斯-牛顿法求解的正规方程就变成了
-\begin{equation}
-    \mathrm{H}_{l} = \left( \mathrm{J}^\top\mathrm{J}+\mu\mathrm{I} \right), \quad
-    \bm{\eta}      = -\mathrm{J}^\top\bm{f}(\bm{x})
-\end{equation}
-\begin{equation}
-    \bm{\delta}_{l} = \mathrm{H}_{l} \:\setminus\: \bm{\eta}
-    \label{eq:levenberg}
-\end{equation}
-其中的$\mu$就是所谓的阻尼因子（damping factor）。
-
-阻尼因子控制住了每次迭代计算的步长的模。通常阻尼因子$\mu$具备下面三个性质\citep{tingleff2004methods}：
-\begin{enumerate}
-    \item 对于任意的$\mu>0$，海森矩阵$(\mathrm{J}^\top\mathrm{J}+\mu\mathrm{I})$正定，这一点保证了求得的步长$\bm{\delta}$处于能量下降的方向；
-    \item 当$\mu\to\infty$时，求得的步长$\bm{\delta}$接近于最速下降方向$-\frac{1}{\mu}\mathrm{J}^\top\bm{f}(\bm{x})$，当当前的变量$\bm{x}$ 的值距离最优解较远时，最速下降的方向更容易符合预期；
-    \item 当$\mu\to0$时，则求得的步长$\bm{\delta}$更接近于高斯-牛顿法的结果，如果当前变量$\bm{x}$的值较为接近最优解，则这样的步长更容易符合预期，因为在收敛点附近，真实的海森矩阵更接近标准的二次型形式。
-\end{enumerate}
-同时，由于正则项$\mu\mathrm{I}$的加入，修改后的海森矩阵$(\mathrm{J}^\top\mathrm{J}+\mu\mathrm{I})$一定为正定二次型矩阵，提升了求解的数值稳定性。
-
-\subsubsection*{莱文贝格-马夸特法}
-
-莱文贝格在海森矩阵的每一个主元上都施加了同样的阻尼限制$\mu$，某种程度上将是对步长$\bm{\delta}$在各个梯度方向上施加了相同的限制，这显然不是最合理的做法。当$\mu$非常大的时候，一定程度上由原始海森矩阵$\mathrm{J}^\top\mathrm{J}$提供的信息就被抑制了，难以被利用。马夸特在莱文贝格的方法上进行了改进，根据海森矩阵的主元大小，对步长的不同梯度方向施加不同的阻尼：
+针对这一情况，LM法在基础的GN法中引入了对迭代步长的直接约束，根据海森矩阵的主元大小，对步长的不同梯度方向施加不同的阻尼：
 \begin{equation}
     \mathrm{H} = \left( \mathrm{J}^\top\mathrm{J}+\mu\mathbf{diag}(\mathrm{J}^\top\mathrm{J}) \right), \quad
     \bm{\eta}  = -\mathrm{J}^\top\bm{f}(\bm{x})
@@ -165,18 +134,24 @@
     \bm{\delta}_{lm} = \mathrm{H} \:\setminus\: \bm{\eta}
     \label{eq:lm}
 \end{equation}
-这样一来，在梯度较小的方向阻尼较小，$\bm{\delta}_{lm}$的分量也就较大，反之则阻尼较大，$\bm{\delta}_{lm}$的分量较小。得益于更合理的阻尼设置，相对于单纯的莱文贝格法，LM法在实际应用中的收敛效率要更好。
+其中的$\mu$就是所谓的阻尼因子（damping factor），其控制住了每次迭代计算的步长的模。通常阻尼因子$\mu$具备下面三个性质\citep{tingleff2004methods}：
+\begin{enumerate}
+    \item 对于任意的$\mu>0$，海森矩阵$(\mathrm{J}^\top\mathrm{J}+\mu\mathbf{diag}(\mathrm{J}^\top\mathrm{J}))$正定，这一点保证了求得的步长$\bm{\delta}_{lm}$处于能量下降的方向；
+    \item 当$\mu\to\infty$时，求得的步长$\bm{\delta}_{lm}$接近于最速下降方向，如果当前的变量$\bm{x}$ 的值距离最优解较远时，最速下降的方向更容易符合预期；
+    \item 当$\mu\to0$时，则求得的步长$\bm{\delta}_{lm}$更接近于GN法的结果，如果当前变量$\bm{x}$的值较为接近最优解，则这样的步长更容易符合预期，因为在收敛点附近，真实的海森矩阵更接近标准的二次型形式。
+\end{enumerate}
+同时，由于正则项$\mu\mathbf{diag}(\mathrm{J}^\top\mathrm{J})$的加入，修改后的海森矩阵$(\mathrm{J}^\top\mathrm{J}+\mu\mathbf{diag}(\mathrm{J}^\top\mathrm{J}))$一定为正定二次型矩阵，提升了求解的数值稳定性。
 
-\subsection{Dog-Leg法}
+\subsubsection*{Dog-Leg法}
 
-Dog-Leg法（简称DL）是另一个经典的求解非线性最小二乘优化的算法，也是信赖域方法的代表。LM法通过阻尼因子来间接地控制每一次迭代的步长，而DL法则显式地使用了信赖域来约束每一次迭代的步长。下面给出传统的使用DL法求解问题\eqref{eq:nls}的步骤\citep{tingleff2004methods}。首先按照常规的求解步骤进行线性化，得到线性最小二乘子问题\eqref{eq:lls}。DL法首先使用式\eqref{eq:gn}求解高斯-牛顿迭代步$\bm{\delta}_{gn}$，然后使用最速下降法求解一阶迭代步：
+Dog-Leg法（简称DL）是另一个经典的求解非线性最小二乘优化的算法，也是信赖域方法的代表。LM法通过阻尼因子来间接地控制每一次迭代的步长，而DL法则显式地使用了信赖域来约束每一次迭代的步长。下面给出传统的使用DL法求解问题\eqref{eq:nls}的步骤\citep{tingleff2004methods}。首先按照常规的求解步骤进行线性化，得到线性最小二乘子问题\eqref{eq:lls}。DL法首先使用式\eqref{eq:gn}求解GN迭代步$\bm{\delta}_{gn}$，然后使用最速下降法求解一阶迭代步：
 \begin{equation}
     \bm{\delta}_{sd} = -\frac{\left\|\bm{g}\right\|^2}
                              {\left\|\mathrm{J}\bm{g}\right\|^2} \bm{g}
     \label{eq:sd}
 \end{equation}
 
-和LM法类似，DL法也是一种结合了高斯-牛顿法和最速下降法的方法。如式\eqref{eq:dl}所示，
+和LM法类似，DL法也是一种结合了GN法和最速下降法的方法。如式\eqref{eq:dl}所示，
 \begin{equation}
     \bm{\delta}_{dl} \coloneqq \left\{
         \begin{array}{lll}
@@ -194,11 +169,11 @@ Dog-Leg法（简称DL）是另一个经典的求解非线性最小二乘优化�
 \end{equation}
 DL法根据当前的信赖域半径$\Delta$和以上求解的两个步长来计算综合的迭代步$\bm{\delta}_{dl}$：
 \begin{enumerate}
-    \item 如果高斯-牛顿迭代步$\bm{\delta}_{gn}$的模小于信赖域半径，则认为可以直接选择$\bm{\delta}_{gn}$；
-    \item 如果高斯-牛顿迭代步$\bm{\delta}_{gn}$的模和最速下降迭代步$\bm{\delta}_{sd}$都大于信赖域半径，则选择$\bm{\delta}_{sd}$并将其缩放到信赖域大小；
-    \item 如果高斯-牛顿迭代步$\bm{\delta}_{gn}$的模大于信赖域半径而最速下降迭代步的模小于信赖域半径，则需要取$\bm{\delta}_{gn}$和$\bm{\delta}_{sd}$连线与信赖域的交点作为迭代步（如图~\ref{fig:dogleg_step}~）。
+    \item 如果GN迭代步$\bm{\delta}_{gn}$的模小于信赖域半径，则认为可以直接选择$\bm{\delta}_{gn}$；
+    \item 如果GN迭代步$\bm{\delta}_{gn}$的模和最速下降迭代步$\bm{\delta}_{sd}$都大于信赖域半径，则选择$\bm{\delta}_{sd}$并将其缩放到信赖域大小；
+    \item 如果GN迭代步$\bm{\delta}_{gn}$的模大于信赖域半径而最速下降迭代步的模小于信赖域半径，则需要取$\bm{\delta}_{gn}$和$\bm{\delta}_{sd}$连线与信赖域的交点作为迭代步（如图~\ref{fig:dogleg_step}）。
 \end{enumerate}
-这样，当$\Delta$较大时，DL法更倾向于使用高斯-牛顿法的迭代步$\bm{\delta}_{gn}$；当$\Delta$较小时则更倾向于最速下降法的迭代步$\bm{\delta}_{sd}$。算法~\ref{alg:dogleg}详细描述了DL法的迭代过程。和高斯-牛顿法一样，DL法在求解式\eqref{eq:gn}的时候也可能遇到海森矩阵$\mathrm{H}$半正定的情况，此时应该选择数值稳定的线性求解方法来求解海森矩阵的伪逆$\mathrm{H}~^\dag$。
+这样，当$\Delta$较大时，DL法更倾向于使用GN法的迭代步$\bm{\delta}_{gn}$；当$\Delta$较小时则更倾向于最速下降法的迭代步$\bm{\delta}_{sd}$。算法~\ref{alg:dogleg}详细描述了DL法的迭代过程。和GN法一样，DL法在求解式\eqref{eq:gn}的时候也可能遇到海森矩阵$\mathrm{H}$半正定的情况，此时应该选择数值稳定的线性求解方法来求解海森矩阵的伪逆$\mathrm{H}^\dag$。
 
 \begin{figure}[htb!]
     \centering
@@ -212,7 +187,7 @@ DL法根据当前的信赖域半径$\Delta$和以上求解的两个步长来计�
 
 \subsection{舒尔补}\label{sec:schur}
 
-不论是使用高斯-牛顿法，LM法还是DL法，在每一轮迭代过程中，都需要进一步通过求解正规方程这个线性系统来得到每一轮迭代的步长（如式\eqref{eq:gn}，\eqref{eq:lm}，\eqref{eq:dl}）。根据经验，SLAM问题具有良好的稀疏性：通常三维点状态的数量要远大于相机状态的数量，而且通常三维点之间没有直接联系；同时，只有物理上距离比较接近的三维点状态和相机状态之间有相互约束。因此，由集束调整问题构建的海森矩阵$\mathrm{H}$也具有稀疏的性质，通过对变量适当的排序，将三维点状态和相机状态分别分组，一般可以得到如图~\ref{fig:sparse_matrix}~所示的特殊的稀疏结构。
+不论是使用GN法，LM法还是DL法，在每一轮迭代过程中，都需要进一步通过求解正规方程这个线性系统来得到每一轮迭代的步长（如式\eqref{eq:gn}，\eqref{eq:lm}，\eqref{eq:dl}）。根据经验，SLAM问题具有良好的稀疏性：通常三维点状态的数量要远大于相机状态的数量，而且通常三维点之间没有直接联系；同时，只有物理上距离比较接近的三维点状态和相机状态之间有相互约束。因此，由集束调整问题构建的海森矩阵$\mathrm{H}$也具有稀疏的性质，通过对变量适当的排序，将三维点状态和相机状态分别分组，一般可以得到如图~\ref{fig:sparse_matrix}所示的特殊的稀疏结构。
 
 \begin{figure}[htb!]
     \centering
@@ -221,7 +196,7 @@ DL法根据当前的信赖域半径$\Delta$和以上求解的两个步长来计�
     \label{fig:sparse_matrix}
 \end{figure}
 
-对于这样具备特殊稀疏结构的线性系统，可以用舒尔补（Schur complement）来加速求解。舒尔补是一种常用的加速求解稀疏线性系统的方法，特别适用于集束调整问题中的正规方程的求解。其本质上是一种基于高斯消元的分块求解线性系统的方法。首先根据图~\ref{fig:sparse_matrix}~对正规方程进行分块：
+对于这样具备特殊稀疏结构的线性系统，可以用舒尔补（Schur complement）来加速求解。舒尔补是一种常用的加速求解稀疏线性系统的方法，特别适用于集束调整问题中的正规方程的求解。其本质上是一种基于高斯消元的分块求解线性系统的方法。首先根据图~\ref{fig:sparse_matrix}对正规方程进行分块：
 \begin{equation}
     \mathrm{H} =
     \begin{bmatrix}

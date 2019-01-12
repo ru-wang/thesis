@@ -9,7 +9,7 @@
     \label{fig:factor_graph}
 \end{figure}
 
-如图~\ref{fig:factor_graph}是一个常见集束调整问题的因子图示例，其对应的正规方程具有如图~\ref{fig:normal_eq}所示的稀疏结构。按照式\eqref{eq:schur_complement}构建相机部分方程的舒尔补，依次迭代计算每一个三维点状态对应的舒尔补部分，并累加到图~\ref{fig:reduced_sys}中的高亮部分所示的舒尔补中。图~\ref{fig:schur_complement}~展示了计算舒尔补的第一次迭代。
+如图~\ref{fig:factor_graph}是一个常见集束调整问题的因子图示例，其对应的正规方程具有如图~\ref{fig:normal_eq}所示的稀疏结构。按照式\eqref{eq:schur_complement}构建相机部分方程的舒尔补，依次迭代计算每一个三维点状态对应的舒尔补部分，并累加到图~\ref{fig:reduced_sys}中的高亮部分所示的舒尔补中。图~\ref{fig:schur_complement}展示了计算舒尔补的第一次迭代。
 
 \begin{figure}[htb!]
     \centering
@@ -41,20 +41,20 @@
     \label{fig:factor_graph_dirty}
 \end{figure}
 
-增量更新舒尔补的方法关键在于尽可能地复用上一次迭代的结果，只针对性地计算舒尔补方程中变化较大的变量对应的部分。以因子图~\ref{fig:factor_graph}为例，假设只有相机状态$5$有较大的更新，则先将其标记为脏变量。在因子图中，只有与脏变量直接相连的因子需要标记为脏因子，如图~\ref{fig:factor_graph_dirty}所示。需要注意的是，尽管相机状态$5$和三维点状态$6$的值并未发生足够大的改变，但是由于与之相连的部分因子被标记为脏因子，因此也需要更新这些因子关于它们的雅各比矩阵。这些脏变量和脏因子共同组成了一个脏子图，对应地，图~\ref{fig:normal_eq_dirty}高亮标示了舒尔补方程中需要更新的脏块。算法~\ref{alg:mark_dirty}~详细说明了如何通过一个简单的宽度优先搜索标记出因子图中的脏子图。
+增量更新舒尔补的方法关键在于尽可能地复用上一次迭代的结果，只针对性地计算舒尔补方程中变化较大的变量对应的部分。以因子图~\ref{fig:factor_graph}为例，假设只有相机状态$5$有较大的更新，则先将其标记为脏变量。在因子图中，只有与脏变量直接相连的因子需要标记为脏因子，如图~\ref{fig:factor_graph_dirty}所示。需要注意的是，尽管相机状态$5$和三维点状态$6$的值并未发生足够大的改变，但是由于与之相连的部分因子被标记为脏因子，因此也需要更新这些因子关于它们的雅各比矩阵。这些脏变量和脏因子共同组成了一个脏子图，对应地，图~\ref{fig:normal_eq_dirty}高亮标示了舒尔补方程中需要更新的脏块。算法~\ref{alg:mark_dirty}详细说明了如何通过一个简单的宽度优先搜索标记出因子图中的脏子图。
 
 \input{Chapters/alg:mark_dirty.tex}
 
 \begin{figure}[htb!]
     \centering
     \includegraphics[scale=1]{Pictures/normal_eq_dirty.png}
-    \caption{图~\ref{fig:factor_graph_dirty}对应的舒尔补方程中的脏块：相机状态$4$、$5$和三维点状态$6$构成的线性子系统。}~
+    \caption{图~\ref{fig:factor_graph_dirty}对应的舒尔补方程中的脏块：相机状态$4$、$5$和三维点状态$6$构成的线性子系统。}
     \label{fig:normal_eq_dirty}
 \end{figure}
 
 \subsection{增量更新舒尔补}
 
-舒尔补方程中被标记为脏块的矩阵构成了一个线性子系统，对应因子图中的脏子图。如图~\ref{fig:schur_update}所展示的，在增量更新舒尔补的过程中，需要先从舒尔补方程中减去脏子图的贡献，随后重新线性化所有的脏因子，最后重新计算舒尔补。算法~\ref{alg:schur_update}详细描述了这个过程。需要注意的是，在计算舒尔补的过程中会重复用到$\mathrm{W}_i\mathrm{P}_{ii}^{-1}\mathrm{W}_i^\top$，$\mathrm{W}_i\mathrm{P}_{ii}^{-1}\bm{l}_i$，$\mathrm{J}_j^\top\mathrm{J}_j$，$\mathrm{J}_j^\top\bm{f}~_j$，需要将这些中间项缓存下来，避免重复计算。
+舒尔补方程中被标记为脏块的矩阵构成了一个线性子系统，对应因子图中的脏子图。如图~\ref{fig:schur_update}所展示的，在增量更新舒尔补的过程中，需要先从舒尔补方程中减去脏子图的贡献，随后重新线性化所有的脏因子，最后重新计算舒尔补。算法~\ref{alg:schur_update}详细描述了这个过程。需要注意的是，在计算舒尔补的过程中会重复用到$\mathrm{W}_i\mathrm{P}_{ii}^{-1}\mathrm{W}_i^\top$，$\mathrm{W}_i\mathrm{P}_{ii}^{-1}\bm{l}_i$，$\mathrm{J}_j^\top\mathrm{J}_j$，$\mathrm{J}_j^\top\bm{f}_j$，需要将这些中间项缓存下来，避免重复计算。
 
 \input{Chapters/alg:schur_update.tex}
 
@@ -67,7 +67,7 @@
 
 \subsection{状态增广}
 
-除了状态变量发生较大变化的时候需要更新因子图和舒尔补方程，集束调整过程中，如果有新的状态或因子加入，也需要对因子图进行增广，并对和舒尔补方程进行相应更新。实际上，这个过程也可以认为是算法~\ref{alg:schur_update}的一个特例。如图~\ref{fig:factor_graph_aug}，新加入的状态通过新的因子与原因子图中相关联的部分状态共同构成了一个子图，将这个子图标记为脏子图，即可使用算法~\ref{alg:schur_update}进行更新。算法~\ref{alg:factor_graph_aug}~给出了详细的过程，为了提高效率，因子图的增广和舒尔补方程的更新会被同时执行。
+除了状态变量发生较大变化的时候需要更新因子图和舒尔补方程，集束调整过程中，如果有新的状态或因子加入，也需要对因子图进行增广，并对和舒尔补方程进行相应更新。实际上，这个过程也可以认为是算法~\ref{alg:schur_update}的一个特例。如图~\ref{fig:factor_graph_aug}，新加入的状态通过新的因子与原因子图中相关联的部分状态共同构成了一个子图，将这个子图标记为脏子图，即可使用算法~\ref{alg:schur_update}进行更新。算法~\ref{alg:factor_graph_aug}给出了详细的过程，为了提高效率，因子图的增广和舒尔补方程的更新会被同时执行。
 
 \begin{figure}[htb!]
     \centering

@@ -2,7 +2,7 @@
 
 iSAM2算法\citep{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使用了贝叶斯树来编码集束调整过程中的信息矩阵分解过程，达到高效地更新平方根信息矩阵的目的，显著地提升了全局优化的性能。其算法不仅适用于SLAM中的集束调整问题，也适用于一般的非线性最小二乘问题。也正是为了保证通用性，iSAM2难以在状态之间的关联特点高度统一的SLAM问题中发挥更高的性能。
 
-例如在图~\ref{fig:sparse_matrix}中，正规方程的三维点部分（左上角部分）高度稀疏，呈对角块状，在求解时应该优先考虑这一部分的分解。iSAM2算法需要依赖COLAMD\citep{davis2004algorithm}~算法来被动地检测矩阵分解的顺序，一方面需要额外的计算时间，另一方面也不一定能得到比经验更好的结果。
+例如在图~\ref{fig:sparse_matrix}中，正规方程的三维点部分（左上角部分）高度稀疏，呈对角块状，在求解时应该优先考虑这一部分的分解。iSAM2算法需要依赖COLAMD\citep{davis2004algorithm}算法来被动地检测矩阵分解的顺序，一方面需要额外的计算时间，另一方面也不一定能得到比经验更好的结果。
 
 \input{Chapters/ischur_update.tex}
 
@@ -10,7 +10,7 @@ iSAM2算法\citep{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使�
 
 \section{增量式集束调整框架}
 
-为了保证通用性，本文构建如图~\ref{fig:framework}~所示的通用求解器的框架：
+为了保证通用性，本文构建如图~\ref{fig:framework}所示的通用求解器的框架：
 
 \begin{figure}[htb!]
     \centering
@@ -19,7 +19,7 @@ iSAM2算法\citep{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使�
     \label{fig:framework}
 \end{figure}
 
-该框架的任意一个部分均可自定义实现，也可以采用内置的算法，具有很好的通用性和扩展性。表~\ref{tab:comp}~展示了本文提出的增量式集束调整框架和其他增量式优化算法的对比
+该框架的任意一个部分均可自定义实现，也可以采用内置的算法，具有很好的通用性和扩展性。表~\ref{tab:comp}展示了本文提出的增量式集束调整框架和其他增量式优化算法的对比
 
 {
 \linespread{1}
@@ -82,10 +82,10 @@ iSAM2算法\citep{kaess2008isam,kaess2012isam2}创新性地在SLAM问题中使�
 本章详细介绍了基于增量式舒尔补的集束调整优化算法，一组增量式集束调整优化的流程总结如下：
 \begin{enumerate}
     \item 根据因子图，采用传统方法构建舒尔补并使用Cholesky分解或PCG方法求解首轮迭代，并构建PBT；
-    \item\label{it:2} 使用算法~\ref{alg:mark_dirty}~标记因子图和舒尔补方程需要更新的部分；
-    \item\label{it:3} 使用算法~\ref{alg:schur_update}~更新舒尔补；
+    \item\label{it:2} 使用算法~\ref{alg:mark_dirty}标记因子图和舒尔补方程需要更新的部分；
+    \item\label{it:3} 使用算法~\ref{alg:schur_update}更新舒尔补；
     \item\label{it:4} 使用Cholesky分解或I-PCG方法求解舒尔补方程；
     \item\label{it:5} 基于PBT推断进行回代求解三维点状态；
-    \item 重复步骤~\ref{it:2}至步骤~\ref{it:5}~直到收敛；
-    \item 当新增了因子或状态时，使用算法~\ref{alg:factor_graph_aug}进行增广，并重新从步骤~\ref{it:2}~开始新一组优化
+    \item 重复步骤~\ref{it:2}至步骤~\ref{it:5}直到收敛；
+    \item 当新增了因子或状态时，使用算法~\ref{alg:factor_graph_aug}进行增广，并重新从步骤~\ref{it:2}开始新一组优化
 \end{enumerate}
