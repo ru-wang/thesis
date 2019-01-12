@@ -1,0 +1,86 @@
+\section{增量式集束调整框架}\label{sec:framework}
+
+为了保证通用性，本文将集束调整的框架划分为因子图、非线性策略、线性求解器三个模块：
+\begin{itemize}
+    \item \textbf{因子图：}此模块对应整个集束调整问题，包括所有目标函数因子和状态变量，以及求解所需的块状稀疏矩阵数据结构。每一个因子数据结构存储了目标函数对应的协方差矩阵和残差、雅各比矩阵计算函数。用户可以使用内置的IMU预积分目标函数和重投影误差目标函数，也可以通过重写相关的虚函数来加入自定义的目标函数。每一个状态变量数据结构包含了状态变量的数值和对应的参数化方法，用户可以使用内置的旋转矩阵或四元数参数化方法，也可以通过重写相关的虚函数来加入自定义的参数化方法。另外，因子图还保存了目标函数和状态变量之间的关系，即因子图的边。
+    \item \textbf{非线性策略：}此模块对应集束调整求解过程中的线性化过程和舒尔补过程，以及变量回代求解的过程。此模块内置了本文提出的HLMDL算法和PBT回代算法，用户可以通过配置相关的选项，改变判断变量是否发生变化的阈值，也可以选择关闭对应的选项，只使用常规的批量式求解策略，如LM方法、DL方法等。
+    \item \textbf{线性求解器：}此模块对应舒尔补方程的线性求解策略，内置了块状稀疏矩阵版本和稠密版本的的Cholesky分解、QR分解和I-PCG求解器。用户可以通过配置相关的选项来选择符合需求的线性求解器。此外，线性求解的接口也是开放的，用户也可以自行实现符合具体数值需求的线性求解器。
+\end{itemize}
+
+\subsection{目标函数}
+
+本框架提供了基于\citen{forster2017manifold}提出的IMU预积分技术的目标函数。与基于传统迭代式IMU积分的VISLAM系统不同，IMU预积分使用了更精确的相对运动模型。将IMU观测模型包含三个部分：相对旋转$\Delta\mathrm{R}$、相对速度$\Delta\bm{v}$、相对平移$\Delta\bm{p}$，可以认为它们是仅关于bias~$\bm{b}^g$和$\bm{b}^a$的函数。式~\eqref{eq:imu_error}给出了目标函数的形式：
+\begin{equation}
+\begin{aligned}
+  \bm{r}_{\Delta\mathrm{R}}
+    &\doteq
+      \log\left(
+        \left(
+          \Delta\bar{\mathrm R}_{ij}
+          \exp\left(
+            \tfrac{\partial\Delta\bar{\mathrm R}_{ij}}{\partial\bm{b}^g_i}
+            \delta\bm{b}^g_i\right)
+        \right) \mathrm{R}^\top_i \mathrm{R}_j
+      \right) \\
+  \bm{r}_{\Delta\bm{v}}
+    &\doteq
+      \mathrm{R}^\top_i(\bm{v}_j - \bm{v}_i - \bm{g}\Delta t_{ij}) -
+      \left[
+        \Delta\bar{\bm v}_{ij} +
+        \tfrac{\partial\Delta\bar{\bm v}_{ij}}{\partial\bm{b}^g_i}
+        \delta\bm{b}^g_i +
+        \tfrac{\partial\Delta\bar{\bm v}_{ij}}{\partial\bm{b}^a_i}
+        \delta\bm{b}^a_i
+      \right] \\
+  \bm{r}_{\Delta\bm{p}}
+    &\doteq
+      \mathrm{R}^\top_i(
+        \bm{p}_j - \bm{p}_i -
+        \bm{v}_i \Delta t_{ij} -
+        \tfrac{1}{2}\bm{g}\Delta t^2_{ij}) -
+      \left[
+        \Delta\bar{\bm p}_{ij} +
+        \tfrac{\partial\Delta\bar{\bm p}_{ij}}{\partial\bm{b}^g_i}
+        \delta\bm{b}^g_i +
+        \tfrac{\partial\Delta\bar{\bm p}_{ij}}{\partial\bm{b}^a_i}
+        \delta\bm{b}^a_i \right]
+\end{aligned}\label{eq:imu_error}
+\end{equation}
+其中$\log$和$\exp$是李群$\mathbb{SO}^3$和对应李代数$\mathfrak{so}^3$之间的对数映射和指数映射。
+\begin{equation}
+\begin{aligned}
+    \Delta\mathrm{R}_{ij}
+  &\doteq \mathrm{R}_i^\top \mathrm{R}_j
+  = \prod_{k=i}^{j-1}
+  \exp\left(
+      (\tilde{\bm \omega}_k - \bm{b}_k^g - \bm{n}_k^g) \Delta t
+  \right) \\
+  %
+  \Delta\bm{v}_{ij}
+  &\doteq \mathrm{R}_i^\top (\bm{v}_j - \bm{v}_i - \bm{g} \Delta t_{ij})
+  = \sum_{k=i}^{j-1}
+  \Delta\mathrm{R}_{ik}
+  (\tilde{\bm a}_k - \bm{b}_k^a - \bm{n}_k^a) \Delta t \\
+  %
+  \Delta\bm{p}_{ij}
+  &\doteq \mathrm{R}_i^\top
+  \left(
+      \bm{p}_j - \bm{p}_i -
+      \bm{v}_i \Delta t_{ij} -
+      \tfrac{1}{2} \bm{g} \Delta t_{ij}^2
+  \right) \\
+  &= \sum_{k=i}^{j-1}
+  \left[
+      \Delta\bm{v}_{ik} \Delta t +
+      \tfrac{1}{2} \Delta\mathrm{R}_{ik}
+      (\tilde{\bm a}_k - \bm{b}_k^a - \bm{n}_k^a) \Delta t^2
+  \right]
+\end{aligned}\label{eq:raw_int}
+\end{equation}
+以上均采用了IMU预积分原文的标记方法，具体细节可参考\citen{forster2017manifold}。
+
+本框架还实现了常用的重投影误差目标函数，其中$\Pi(\cdot)$是投影函数，$\mathrm{K}$是相机内参矩阵：
+\begin{equation}
+    \bm{r}_{proj} \doteq \Pi
+    \left( \mathrm{K} \mathrm{R}^\top_i (\bm{l}_j - \bm{p}_i) \right)
+\end{equation}
