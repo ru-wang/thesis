@@ -1,6 +1,6 @@
-\section{线性求解}
+\section{线性求解}\label{sec:lin_solver}
 
-通过算法~\ref{alg:schur_update}跟新舒尔补方程后，可以通过求解舒尔补方程快速得到相机状态的增量$\bm{\delta}_c$，再进一步通过回代求解三维点状态的增量$\bm{\delta}_l$。为了提升这部分求解数值稳定性，本文提出了使用混合式LM-DL方法（Hybrid Levenberg-Marquardt-Dog-Leg，简称HLMDL）求解舒尔补方程。在回代求解部分，受iSAM2\citep{kaess2012isam2}算法的启发，本文提出了使用部分贝叶斯推断树（Partial Bayes Tree，简称PBT）的方法编码三维点状态和相机状态之间的的推断关系，以达到增量式回代的目的，进一步提高效率。
+通过算法~\ref{alg:schur_update}更新舒尔补方程后，可以通过求解舒尔补方程快速得到相机状态的增量$\bm{\delta}_c$，再进一步通过回代求解三维点状态的增量$\bm{\delta}_l$。为了提升这部分求解数值稳定性，本文提出了使用混合式LM-DL方法（Hybrid Levenberg-Marquardt-Dog-Leg，简称HLMDL）求解舒尔补方程。在回代求解部分，受iSAM2\citep{kaess2012isam2}算法的启发，本文提出了使用部分贝叶斯推断树（Partial Bayes Tree，简称PBT）的方法编码三维点状态和相机状态之间的的推断关系，以达到增量式回代的目的，进一步提高效率。
 
 \subsection{HLMDL方法求解舒尔补方程}
 
