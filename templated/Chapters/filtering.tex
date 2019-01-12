@@ -1,6 +1,6 @@
 \section{基于扩展卡尔曼滤波的状态估计}
 
-在SLAM领域中，主流的状态估计算法有两类：基于扩展卡尔曼滤波（Extended Kalman Filter，以下简称EKF）的滤波法和基于非线性最小二乘（Nonlinear Least Squares）的优化法。两类方法没有本质上的区别，都是使用最大化后验概率（Maximum A-Posteriori estimation）的思想求解非线性系统的最优状态分布。本节将介绍EKF的基本原理。
+在SLAM领域中，主流的状态估计算法有两类：基于扩展卡尔曼滤波（Extended Kalman Filter，简称EKF）的滤波法和基于非线性最小二乘（Nonlinear Least Squares）的优化法。两类方法没有本质上的区别，都是使用最大化后验概率（Maximum A-Posteriori estimation）的思想求解非线性系统的最优状态分布。本节将介绍EKF的基本原理。
 
 EKF将状态估计的过程分为状态预测（predict）和状态更新（update）两个步骤，分别对应状态的转移模型（propagation model）和观测模型（observation model）。在状态预测阶段，EKF通过状态转移模型预测当前系统状态的先验分布，而在状态更新阶段，EKF通过当前时刻的观测模型和观测值对状态的分布进行修正，得到后验状态分布：
 \begin{equation}

@@ -1,6 +1,6 @@
 \section{SLAM状态估计相关工作}
 
-VSLAM和VISLAM都需要根据系统的先验估计、传感器观测来对系统的状态进行估计，可能包括实时的位姿状态、传感器状态、场景三维点状态以及其他可能的信息。主流的SLAM方法根据状态估计的方法可以分为基于扩展卡尔曼滤波（Extended Kalman Filter，以下简称EKF）的滤波法和基于非线性最小二乘（Nonlinear Least Squares）的优化法。两类方法没有本质上的区别，都是使用最大化后验概率（Maximum A-Posteriori estimation，以下简称MAP）的思想求解非线性系统的最优状态估计，但是在求解的速度、精度以及算法的可扩展性上存在一定差异。根据对视觉信息的利用方法又可以分为直接法（direct methods）和特征法（feature-based methods）。使用关键点进行图像匹配，并使用重投影误差（reprojection error）作为视觉约束求解三维结构的方法称为特征法。直接使用稠密或稀疏的图像像素信息，并使用光度误差（photometric error）作为视觉约束的方法称为直接法。
+VSLAM和VISLAM都需要根据系统的先验估计、传感器观测来对系统的状态进行估计，可能包括实时的位姿状态、传感器状态、场景三维点状态以及其他可能的信息。主流的SLAM方法根据状态估计的方法可以分为基于扩展卡尔曼滤波（Extended Kalman Filter，简称EKF）的滤波法和基于非线性最小二乘（Nonlinear Least Squares）的优化法。两类方法没有本质上的区别，都是使用最大化后验概率（Maximum A-Posteriori estimation，简称MAP）的思想求解非线性系统的最优状态估计，但是在求解的速度、精度以及算法的可扩展性上存在一定差异。根据对视觉信息的利用方法又可以分为直接法（direct methods）和特征法（feature-based methods）。使用关键点进行图像匹配，并使用重投影误差（reprojection error）作为视觉约束求解三维结构的方法称为特征法。直接使用稠密或稀疏的图像像素信息，并使用光度误差（photometric error）作为视觉约束的方法称为直接法。
 
 \subsection{基于滤波法的SLAM状态估计}
 

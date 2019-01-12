@@ -121,7 +121,7 @@
 
 \subsection{莱文贝格-马夸特方法}
 
-除了高斯-牛顿法之外，还有一种经典的求解非线性最小二乘优化的算法：莱文贝格-马夸特（Levenberg-Marquardt，以下简称LM）法。它也被认为是带有阻尼因子的高斯-牛顿法，也是信赖域方法（trust region method）的前身\citep{jorge2006numerical}。
+除了高斯-牛顿法之外，还有一种经典的求解非线性最小二乘优化的算法：莱文贝格-马夸特（Levenberg-Marquardt，简称LM）法。它也被认为是带有阻尼因子的高斯-牛顿法，也是信赖域方法（trust region method）的前身\citep{jorge2006numerical}。
 
 前面提到，一般的纯视觉的SLAM算法中，尺度是不可观测的，也就是说VSLAM的状态估计中，对全局所有的三维点坐标和相机位置进行统一的缩放，不会引起重投影误差的改变（在不考虑数值误差的情况下）。从求解VSLAM集束调整问题的角度来看，这一性质造成了在直接使用高斯-牛顿法时海森矩阵的秩亏现象，即矩阵$\mathrm{J}^\top\mathrm{J}$为半正定的情况。此时直接使用矩阵分解求逆的方法求解线性最小二乘子问题就会得到数值不稳定的结果，比如解得的步长在某个方向过大等。
 
@@ -169,7 +169,7 @@
 
 \subsection{Dog-Leg法}
 
-Dog-Leg法（以下简称DL）是另一个经典的求解非线性最小二乘优化的算法，也是信赖域方法的代表。LM法通过阻尼因子来间接地控制每一次迭代的步长，而DL法则显式地使用了信赖域来约束每一次迭代的步长。下面给出传统的使用DL法求解问题\eqref{eq:nls}的步骤\citep{tingleff2004methods}。首先按照常规的求解步骤进行线性化，得到线性最小二乘子问题\eqref{eq:lls}。DL法首先使用式\eqref{eq:gn}求解高斯-牛顿迭代步$\bm{\delta}_{gn}$，然后使用最速下降法求解一阶迭代步：
+Dog-Leg法（简称DL）是另一个经典的求解非线性最小二乘优化的算法，也是信赖域方法的代表。LM法通过阻尼因子来间接地控制每一次迭代的步长，而DL法则显式地使用了信赖域来约束每一次迭代的步长。下面给出传统的使用DL法求解问题\eqref{eq:nls}的步骤\citep{tingleff2004methods}。首先按照常规的求解步骤进行线性化，得到线性最小二乘子问题\eqref{eq:lls}。DL法首先使用式\eqref{eq:gn}求解高斯-牛顿迭代步$\bm{\delta}_{gn}$，然后使用最速下降法求解一阶迭代步：
 \begin{equation}
     \bm{\delta}_{sd} = -\frac{\left\|\bm{g}\right\|^2}
                              {\left\|\mathrm{J}\bm{g}\right\|^2} \bm{g}
