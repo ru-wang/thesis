@@ -19,7 +19,7 @@ LM法的阻尼因子会影响正规矩阵的对角线元素，经过舒尔补操
 \end{equation}
 由于阻尼因子直接施加在构建好的舒尔补矩阵上而非原始的正规矩阵$\mathrm{H}$，其影响是可逆的，经过简单的操作即可恢复，在下一轮迭代中仍可以使用增量式方法更新舒尔补方程。通过HLMDL方法求得的$\bm{\delta}_c$是原始舒尔补方程的一个近似解，但是由于使用了迭代的方式求解，单次迭代的近似解对最终的结果影响很小。这里的阻尼因子的调整与DL的信赖信赖的调整是独立的，本文使用了\citen{tingleff2004methods}中的方法进行阻尼调节，逐步缩小阻尼因子，使得最后的解收敛于准确的解。
 
-方程\eqref{eq:hlmdl}的求解可以使用任何常用的矩阵分解法，如QR分解、Cholesky分解等。也可以采用迭代式的线性求解方法，比如预处理共轭梯度法（preconditioned conjugate gradient，简称PCG）。本文提出的框架提供了自定义线性求解方法的接口，用户可以自己实现符合实际数值稳定性需求和求解效率要求的线性求解方法，也可以使用内置的Cholesky分解求解器和增量PCG（I-PCG）求解器。
+方程\eqref{eq:hlmdl}的求解可以使用任何常用的矩阵分解法，如QR分解、Cholesky分解等。也可以采用迭代式的线性求解方法，比如预处理共轭梯度法（preconditioned conjugate gradient，简称PCG）。本文提出的框架提供了自定义线性求解方法的接口，用户可以自己实现符合实际数值稳定性需求和求解效率要求的线性求解方法，也可以使用内置的Cholesky分解求解器和I-PCG求解器。
 
 由于HLMDL方法在舒尔补方程上施加了阻尼因子，本文没有使用增量式Cholesky分解\citep{polok2013incremental}来求解式\eqref{eq:hlmdl}，而是提供了常规的Cholesky分解法和ICE-BA中提出的I-PCG方法，并配合Jacobi预处理方法\citep{jeong2012pushing}来提升线性求解的效率。
 
