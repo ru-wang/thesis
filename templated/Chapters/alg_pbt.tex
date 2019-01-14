@@ -1,0 +1,30 @@
+\begin{algorithm}
+\caption{PBT回代算法}
+\begin{algorithmic}
+    \Require PBT树$\mathcal{T}_p$，相机状态增量$\bm{\delta}^c$
+    \Ensure 三维点状态增量$\bm{\delta}^l$
+    \State{$\bm{\delta}^l \coloneqq \bm{0}$}
+    \ForAll{叶子节点$L(l_i|\mathcal{S}_i)\in\mathcal{T}_p$}
+        \State{记$\mathcal{S}_i$对应的相机状态增量为$\bm{\delta}^c_{S_i}$}
+        \If{\{$\left\|\bm{\delta}^c_{S_i}\right\|_{\infty} < \varepsilon$\}}
+            \State $\bm{\delta}^l_i \coloneqq \bm{0}$
+        \Else
+            \State $\bm{\delta}^l_i \coloneqq \bm{l}_i$
+            \ForAll{\{$\bm{\delta}^c_j\in\mathcal{S}_i$\}}
+                \State
+                {
+                    $\bm{\delta}^l_i \coloneqq
+                     \bm{\delta}^l_i - \mathrm{W}^\top_{ji}\bm{\delta}^c_j$
+                }
+            \EndFor
+            \State
+            {
+                $\bm{\delta}^l_i \coloneqq
+                 \mathrm{P}_{ii}^{-1} \bm{\delta}^l_i$
+            }
+        \EndIf
+    \EndFor
+\end{algorithmic}
+\label{alg:pbt}
+\end{algorithm}
+
