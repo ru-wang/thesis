@@ -187,6 +187,105 @@
 \newtheorem{theo}{定理~}[chapter]
 \newtheorem{pro}{证明~}[chapter]
 
+\newcommand\makeProposalCoverPage{%
+  % 这个地方写的是封面上的分类号与学号，字体字号可以更改
+  \pagenumbering{alph}
+  %\cleardoublepage
+  \thispagestyle{empty}
+  {
+    \songti\zihao{-4}
+    \linespread{1.3}
+    \begin{center}
+      {\hspace{2em}
+      \ZJU@label@classification~
+      \ZJUunderline[90pt]{\ZJU@value@classification}
+      \hfill
+      \ZJU@label@serialnumber~
+      \ZJUunderline[60pt]{\ZJU@value@serialnumber} \\
+      \vspace{3pt}
+      \ifx\ZJU@value@IsSecret\undefined
+      \else
+        \hspace{2em}
+        \ZJU@label@SecretLevel~
+        \ZJUunderline[90pt]{\ZJU@value@SecretLevel}
+      \fi
+      \hfill
+      \ZJU@label@PersonalID~
+      \ZJUunderline[60pt]{\ZJU@value@PersonalID}\\
+      }
+      % 这个尺寸可以更改
+      \vspace{10mm}
+      % 浙江大学四个字
+      \includegraphics[width=60.3mm]{./CoverPagepic/ZJDX.pdf}
+
+      % 这个尺寸可以更改
+      \vspace{4mm}
+      %% \ZJU@value@school \\  \zihao{-1}
+      % 这个博士学位论文在def文件中已有，当然在tex文件中还可以更改
+      \centerline{\songti \zihao{-1}{\ZJU@value@degree\ZJU@label@proposal} }
+      % 这个尺寸可以更改
+      \vspace{4mm}
+      % 这个地方调入浙大徽标
+      \includegraphics[width=22.8mm]{./CoverPagepic/QSY.pdf}    \\
+
+      \vspace{20mm}
+
+      % 论文题目部分内容，可以修改
+      \begin{tabular}{rl}
+        {\bfseries\fangsong\zihao{3}\ZJU@label@title:}
+        &
+        \bfseries\fangsong\zihao{-2} \ZJUunderline[260pt]{\ZJU@value@title} \\[3mm]
+        &
+        % 这个地方是做第二行标题的判断，如果标题一行写不下，有第二行则显示，否则不显示
+        \ifx\ZJU@value@titletl\undefined
+          \hfil
+        \else
+          {\bfseries\fangsong\zihao{-2}\ZJUunderline[260pt]{\ZJU@value@titletl}}
+        \fi \\[4mm]
+         % {\bfseries\fangsong\zihao{3}\ZJU@label@Etitle:}
+         % &
+         % {\bfseries\zihao{-2}\ZJUunderline[260pt]{\ZJU@value@Etitle}}\\[3mm]
+         % &
+        %同样是英文标题的多行判断，如果一行写不下，有第二行显示，否则不显示第二行
+         % \ifx\ZJU@value@Etitletl\undefined
+         %  \hfil
+         % \else
+         %  {\bfseries\zihao{-2}\ZJUunderline[260pt]{\ZJU@value@Etitletl}}
+         % \fi\\
+      \end{tabular}
+      % 这个距离可以修改
+      \vspace{15mm}
+      % 左右两边字体不同，定义两个宏AB来简化代码，这个功能用到了array宏包
+      \newcolumntype{A}{>{\songti}r<{}}
+      \newcolumntype{B}{>{\fangsong}l<{}}
+      \zihao{4}
+      \begin{tabular}{A@{: }B}
+        \ZJU@label@author & \ZJUunderline[200pt]{\ZJU@value@author} \\[3mm]
+        \ZJU@label@supervisor & \ZJUunderline[200pt]{\ZJU@value@supervisor} \\[3mm]
+        % 判断有没有合作导师
+        \ifx\ZJU@value@cpsupervisor\undefined
+        \else
+         \ZJU@label@cpsupervisor
+        \fi
+        &
+        \ifx\ZJU@value@cpsupervisor\undefined
+        \hfil\\[-7.7mm]
+        \else
+          \ZJUunderline[200pt]{\ZJU@value@cpsupervisor} \\[3mm]
+        \fi
+        \ZJU@label@major & \ZJUunderline[200pt]{\ZJU@value@major} \\[3mm]
+        \ZJU@label@researchdm & \ZJUunderline[200pt]{\ZJU@value@researchdm} \\[3mm]
+        \ZJU@label@institute & \ZJUunderline[200pt]{\ZJU@value@institute} \\
+      \end{tabular}
+    \end{center}
+    % 插入适当的空白
+    \vfill
+    % 最后一项 论文提交日期
+    \hfil{\bfseries\songti\zihao{-3}\hspace{4em}\ZJU@label@submitdate%
+    \ZJUunderline[150pt]{\ZJU@value@submitdate}}\hfil
+  }
+}
+
 % 制作封面的命令
 \newcommand\makeCoverPage{%
   % 这个地方写的是封面上的分类号与学号，字体字号可以更改

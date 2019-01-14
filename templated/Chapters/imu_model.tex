@@ -26,7 +26,7 @@ IMU是测量物体三轴角速度以及加速度的装置，包含三轴陀螺�
                 \bm{b}^a + \bm{n}^a
 \end{aligned}
 \end{equation}
-可以看到，IMU的的读数可以看成是真实值、偏移和加性高斯白噪声（addative Gaussian white noise）之和。而加速度的测量中又包含了重力$\prescript{G}{}{\bm g}$的影响。bias和白噪声具备如下性质：
+可以看到，IMU的读数可以看成是真实值、偏移和加性高斯白噪声（addative Gaussian white noise）之和。而加速度的测量中又包含了重力$\prescript{G}{}{\bm g}$的影响。bias和白噪声具备如下性质：
 \begin{itemize}
     \item bias~$\bm{b}^g$和$\bm{b}^a$：随时间的增长符合零均值的高斯随机游走。该噪声从IMU开机以来就一直存在，不断积累，与是否从IMU读取数据无关。可以用如下高斯分布来描述：
         \begin{equation}
