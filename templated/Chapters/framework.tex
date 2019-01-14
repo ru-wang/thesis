@@ -9,78 +9,87 @@
 
 \subsection{目标函数}
 
-本框架提供了基于\citen{forster2017manifold}提出的IMU预积分技术的目标函数。与基于传统迭代式IMU积分的VISLAM系统不同，IMU预积分使用了更精确的相对运动模型。将IMU观测模型包含三个部分：相对旋转$\Delta\mathrm{R}$、相对速度$\Delta\bm{v}$、相对平移$\Delta\bm{p}$，可以认为它们是仅关于bias~$\bm{b}^g$和$\bm{b}^a$的函数。式~\eqref{eq:imu_error}给出了目标函数的形式：
+本框架提供了基于\citen{forster2017manifold}提出的IMU预积分技术的目标函数。与基于传统迭代式IMU积分的VISLAM系统不同，IMU预积分使用了更精确的相对运动模型。将IMU观测模型包含三个部分：相对旋转$\Delta\mathrm{R}$、相对速度$\Delta\bm{v}$、相对平移$\Delta\bm{p}$，可以认为它们是仅关于bias~$\bm{b}^g$和$\bm{b}^a$的函数。
+
+记$i$时刻相机-IMU状态为：
+\begin{equation}
+\bm{X}_i \doteq
+\begin{bmatrix}
+    \mathrm{R}_i & \bm{v}_i & \bm{p}_i & \bm{b}^g_i & \bm{b}^a_i
+\end{bmatrix}
+\end{equation}
+分别代表该时刻系统在全局坐标系下的朝向、速度、位置以及系统自身坐标系下的角速度bias和加速度bias。那么状态$\bm{X}_i$时刻和$\bm{X}_j$时刻之间的IMU预积分目标函数为：
 \begin{equation}
 \begin{aligned}
-  \bm{r}_{\Delta\mathrm{R}}
-    &\doteq
-      \log\left(
+    \bm{r}_{\Delta\mathrm{R}_{ij}} &\doteq
+    \log \left(
         \left(
-          \Delta\bar{\mathrm R}_{ij}
-          \exp\left(
-            \tfrac{\partial\Delta\bar{\mathrm R}_{ij}}{\partial\bm{b}^g_i}
-            \delta\bm{b}^g_i\right)
-        \right) \mathrm{R}^\top_i \mathrm{R}_j
-      \right) \\
-  \bm{r}_{\Delta\bm{v}}
-    &\doteq
-      \mathrm{R}^\top_i(\bm{v}_j - \bm{v}_i - \bm{g}\Delta t_{ij}) -
-      \left[
-        \Delta\bar{\bm v}_{ij} +
-        \tfrac{\partial\Delta\bar{\bm v}_{ij}}{\partial\bm{b}^g_i}
-        \delta\bm{b}^g_i +
-        \tfrac{\partial\Delta\bar{\bm v}_{ij}}{\partial\bm{b}^a_i}
-        \delta\bm{b}^a_i
-      \right] \\
-  \bm{r}_{\Delta\bm{p}}
-    &\doteq
-      \mathrm{R}^\top_i(
-        \bm{p}_j - \bm{p}_i -
-        \bm{v}_i \Delta t_{ij} -
-        \tfrac{1}{2}\bm{g}\Delta t^2_{ij}) -
-      \left[
-        \Delta\bar{\bm p}_{ij} +
-        \tfrac{\partial\Delta\bar{\bm p}_{ij}}{\partial\bm{b}^g_i}
-        \delta\bm{b}^g_i +
-        \tfrac{\partial\Delta\bar{\bm p}_{ij}}{\partial\bm{b}^a_i}
-        \delta\bm{b}^a_i \right]
+            \Delta\bar{\mathrm R}_{ij}
+            \exp \left(
+                \tfrac{\partial\Delta\bar{\mathrm R}_{ij}}{\partial\bm{b}^g_i} \delta\bm{b}^g_i
+            \right)
+        \right)
+        \mathrm{R}^\top_i \mathrm{R}_j
+    \right) \\
+    %
+    \bm{r}_{\Delta\bm{v}_{ij}} &\doteq
+        \mathrm{R}^\top_i
+        (\bm{v}_j - \bm{v}_i - \bm{g}\Delta t_{ij}) -
+        \left[
+            \Delta\bar{\bm v}_{ij} +
+            \tfrac{\partial\Delta\bar{\bm v}_{ij}}{\partial\bm{b}^g_i}
+            \delta\bm{b}^g_i +
+            \tfrac{\partial\Delta\bar{\bm v}_{ij}}{\partial\bm{b}^a_i}
+            \delta\bm{b}^a_i
+        \right] \\
+    %
+    \bm{r}_{\Delta\bm{p}_{ij}} &\doteq
+        \mathrm{R}^\top_i
+        (\bm{p}_j - \bm{p}_i - \bm{v}_i \Delta t_{ij} - \tfrac{1}{2}\bm{g}\Delta t^2_{ij}) -
+        \left[
+            \Delta\bar{\bm p}_{ij} +
+            \tfrac{\partial\Delta\bar{\bm p}_{ij}}{\partial\bm{b}^g_i}
+            \delta\bm{b}^g_i +
+            \tfrac{\partial\Delta\bar{\bm p}_{ij}}{\partial\bm{b}^a_i}
+            \delta\bm{b}^a_i
+        \right] \\
+    %
+    \bm{r}_{\bm{b}^g_{ij}} &\doteq \bm{b}^g_j - \bm{b}^g_i \\
+    \bm{r}_{\bm{b}^a_{ij}} &\doteq \bm{b}^a_j - \bm{b}^a_i
 \end{aligned}\label{eq:imu_error}
 \end{equation}
-其中$\log$和$\exp$是李群$\mathbb{SO}^3$和对应李代数$\mathfrak{so}^3$之间的对数映射和指数映射。
+其中$\bm{g}$为全局坐标系下的重力加速度，$\delta\bm{b}^g_i$和$\delta\bm{b}^a_i$分别为角速度及加速度bias的增量，$\Delta\bar{\bm{X}}_{ij}$为IMU预积分的结果：
+\begin{equation}
+\Delta\bar{\bm{X}}_{ij} \doteq
+\begin{bmatrix}
+    \Delta\bar{\mathrm{R}}_{ij} &
+    \Delta\bar{\bm{v}}_{ij} &
+    \Delta\bar{\bm{p}}_{ij}
+\end{bmatrix}
+\end{equation}
+$\log$和$\exp$是李群$\mathbb{SO}^3$和对应李代数$\mathfrak{so}^3$之间的对数映射和指数映射。以上均采用了IMU预积分原文的标记方法，具体细节可参考\citen{forster2017manifold}。
+
+本框架还实现了常用的重投影误差目标函数，某时刻的全局坐标系下的三维点$\bm{l}_k$在相机-IMU状态$\bm{X}_i$中的投影误差如下所示：
+\begin{equation}
+    \bm{r}_{\pi_{ik}} \doteq \pi
+    \left( \mathrm{K} \mathrm{R}^\top_i (\bm{l}_k - \bm{p}_i) \right)
+\end{equation}
+其中$\pi(\cdot)$是投影函数，$\mathrm{K}$是相机内参矩阵。
+
+某时刻VISLAM中的集束调整问题的总能量函数可以记为：
 \begin{equation}
 \begin{aligned}
-    \Delta\mathrm{R}_{ij}
-  &\doteq \mathrm{R}_i^\top \mathrm{R}_j
-  = \prod_{k=i}^{j-1}
-  \exp\left(
-      (\tilde{\bm \omega}_k - \bm{b}_k^g - \bm{n}_k^g) \Delta t
-  \right) \\
-  %
-  \Delta\bm{v}_{ij}
-  &\doteq \mathrm{R}_i^\top (\bm{v}_j - \bm{v}_i - \bm{g} \Delta t_{ij})
-  = \sum_{k=i}^{j-1}
-  \Delta\mathrm{R}_{ik}
-  (\tilde{\bm a}_k - \bm{b}_k^a - \bm{n}_k^a) \Delta t \\
-  %
-  \Delta\bm{p}_{ij}
-  &\doteq \mathrm{R}_i^\top
-  \left(
-      \bm{p}_j - \bm{p}_i -
-      \bm{v}_i \Delta t_{ij} -
-      \tfrac{1}{2} \bm{g} \Delta t_{ij}^2
-  \right) \\
-  &= \sum_{k=i}^{j-1}
-  \left[
-      \Delta\bm{v}_{ik} \Delta t +
-      \tfrac{1}{2} \Delta\mathrm{R}_{ik}
-      (\tilde{\bm a}_k - \bm{b}_k^a - \bm{n}_k^a) \Delta t^2
-  \right]
-\end{aligned}\label{eq:raw_int}
+    E &\doteq
+      \sum_{i=1,j=i+1}^{I-1}
+      \Big(
+          \lVert \bm{r}_{\Delta\mathrm{R}_{ij}} \rVert^2_{\Sigma_R} +
+          \lVert \bm{r}_{\Delta\bm{v}_{ij}} \rVert^2_{\Sigma_v} +
+          \lVert \bm{r}_{\Delta\bm{p}_{ij}} \rVert^2_{\Sigma_p} \\
+      &+  \lVert \bm{r}_{\bm{b}^g_{ij}} \rVert^2_{\Sigma_{bg}} +
+          \lVert \bm{r}_{\bm{b}^a_{ij}} \rVert^2_{\Sigma_{ba}}
+      \Big) +
+      \sum_{i=1}^{I} \sum_{k=1}^{K_i}
+      \lVert \bm{r}_{\pi_{ik}} \rVert^2_{\Sigma_\pi}
+\end{aligned}
 \end{equation}
-以上均采用了IMU预积分原文的标记方法，具体细节可参考\citen{forster2017manifold}。
-
-本框架还实现了常用的重投影误差目标函数，其中$\Pi(\cdot)$是投影函数，$\mathrm{K}$是相机内参矩阵：
-\begin{equation}
-    \bm{r}_{proj} \doteq \Pi
-    \left( \mathrm{K} \mathrm{R}^\top_i (\bm{l}_j - \bm{p}_i) \right)
-\end{equation}
+其中$I$为当前所有相机-IMU状态的集合，$K_i$为相机-IMU状态$\bm{X}_i$观测到的所有三维点的集合，$\Sigma_R$，$\Sigma_v$，$\Sigma_p$，$\Sigma_{bg}$，$\Sigma_{ba}$，$\Sigma_\pi$为对应目标函数的协方差。
