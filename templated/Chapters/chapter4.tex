@@ -4,7 +4,7 @@
 
 \section{测试设置}
 
-测试数据包含本文自行模拟生成的相机-IMU-三维点的数据集Cubic-50和包含相机-三维点的VSLAM真实数据集Cathedral\citep{kim2014influence}和Venice\citep{kummerle2011g}。其中Cubic-50数据集为模拟生成的带高斯噪声的VISLAM数据集，包含IMU预积分的结果和协方差、相机状态的初值、视觉观测。Cathedral和Venice为真实数据集，包含相机状态的初值、三维点状态的初值和视觉观测。这样的设置省去了SLAM前端视觉匹配、IMU积分的过程，保证所有算法求解的问题相同。几组数据具体包含的内容如表~\ref{tab:dataset}所示，由于Ceres-Solver的DL法策略求解完整的Cathedral数据集和Venice数据集，顾只取Cathedral数据集的前$45$个相机状态，和Venice数据集的前$50$个相机状态，后文将用Cathedral-46和Venice-51代表这两个数据集。
+测试数据包含本文自行模拟生成的相机-IMU-三维点的数据集Cubic-50和包含相机-三维点的VSLAM真实数据集Cathedral\citep{kim2014influence}和Venice\citep{kummerle2011g}。其中Cubic-50数据集为模拟生成的带高斯噪声的VISLAM数据集，包含IMU预积分的结果和协方差、相机状态的初值、视觉观测。Cathedral和Venice为真实数据集，包含相机状态的初值、三维点状态的初值和视觉观测。这样的设置省去了SLAM前端视觉匹配、IMU积分的过程，保证所有算法求解的问题相同。几组数据具体包含的内容如表~\ref{tab:dataset}所示，由于Ceres-Solver的DL法策略求解完整的Cathedral数据集和Venice数据集失败，即集束调整求解过程中能量不能收敛，顾只取Cathedral数据集的前$45$个相机状态，和Venice数据集的前$50$个相机状态，后文将用Cathedral-46和Venice-51代表这两个数据集。
 
 {
 \linespread{1}
@@ -41,7 +41,7 @@
 \centering
 \begin{tabular}[b]{l|ccc}
     \toprule
-    优化策略耗时（T/t）       &   Cubic-50 &       Venice-51 &    Cathedral-46 \\ \midrule
+    求解策略耗时（T/t）       &   Cubic-50 &       Venice-51 &    Cathedral-46 \\ \midrule
     Ceres-LM：Schur-QR        & $48$ms/$4$ & $23018$ms/$230$ & $42706$ms/$204$ \\
     耗时相对于基准的百分比    &  $100.0\%$ &       $100.0\%$ &       $100.0\%$ \\ \midrule
     Ceres-DL：Schur-QR        & $44$ms/$4$ &            失败 &            失败 \\
@@ -66,7 +66,7 @@
 \centering
 \begin{tabular}[b]{l|ccc}
     \toprule
-    优化策略及收敛时总能量$E$ &          Cubic-50 &            Venice-51 &         Cathedral-46 \\
+    求解策略及收敛时总能量$E$ &          Cubic-50 &            Venice-51 &         Cathedral-46 \\
     总能量初始值$E_0$         & $2.514\times10^3$ &  $9.171\times10^{0}$ &  $3.600\times10^{0}$ \\ \midrule
     Ceres-LM：Schur-QR        & $4.956\times10^2$ & $1.599\times10^{-1}$ & $7.135\times10^{-1}$ \\
     Ceres-DL：Schur-QR        & $5.153\times10^2$ &                  N/A &                  N/A \\
@@ -77,7 +77,7 @@
 \end{table}
 }
 
-可以看到，基于本文提出的增量式集束调整框架无论是在效率还是在精度上都达到了可用的水准。不同的数据集测试结果表示，在精度接近的情况下（收敛时总能量接近），本文提出的HLMDL-增量舒尔补算法相对于Ceres-Solver的测试基准，求解时间减少了$84.3\%$至$62.5\%$不等，显著提升了效率。
+表~\ref{tab:time}和表~\ref{tab:energy}中，“失败”或“N/A”项代表某求解策略在该数据集上能量无法收敛，相关数据无法提供。可以看到，基于本文提出的增量式集束调整框架无论是在效率还是在精度上都达到了可用的水准。不同的数据集测试结果表示，在精度接近的情况下（收敛时总能量接近），本文提出的HLMDL-增量舒尔补算法相对于Ceres-Solver的测试基准，求解时间减少了$84.3\%$至$62.5\%$不等，显著提升了效率。
 
 \section{本章小结}
 
