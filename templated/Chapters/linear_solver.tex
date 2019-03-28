@@ -2,9 +2,15 @@
 
 通过算法~\ref{alg:schur_update}更新舒尔补方程后，可以通过求解舒尔补方程快速得到相机状态的增量$\bm{\delta}^c$，再进一步通过回代求解三维点状态的增量$\bm{\delta}^l$。为了提升这部分求解数值稳定性，本文提出了使用混合式LM-DL方法（Hybrid Levenberg-Marquardt-Dog-Leg，简称HLMDL）求解舒尔补方程。在回代求解部分，受iSAM2\citep{kaess2012isam2}算法的启发，本文提出了使用部分贝叶斯推断树（Partial Bayes Tree，简称PBT）的方法编码三维点状态和相机状态之间的推断关系，以达到增量式回代的目的，进一步提高效率。
 
+\subsection{传统DL算法}
+
+LM法的阻尼因子会影响正规矩阵的对角线元素，经过舒尔补操作之后，阻尼因子的影响被不可逆地累积到了舒尔补矩阵中，使得每次调整阻尼因子的时候必须要重新完整计算舒尔补。这会导致舒尔补无法进行增量更新，因此ICE-BA\citep{liu2018ice}和SLAM++中均使用DL法进行非线性求解。第~\ref{ch:intro}~章已经介绍了DL算法的基本策略，算法~\ref{alg:dogleg}给出了传统DL算法的详细步骤。
+
+\input{Chapters/alg_dogleg.tex}
+
 \subsection{HLMDL方法求解舒尔补方程}
 
-LM法的阻尼因子会影响正规矩阵的对角线元素，经过舒尔补操作之后，阻尼因子的影响被不可逆地累积到了舒尔补矩阵中，使得每次调整阻尼因子的时候必须要重新完整计算舒尔补。这会导致舒尔补无法进行增量更新，因此ICE-BA\citep{liu2018ice}和SLAM++中均使用DL法进行非线性求解。然而如第~\ref{ch:intro}~章中提到的，在实际求解线性问题时，往往会遇到矩阵秩亏或不正定的情况，而且这种情况在舒尔补矩阵中更为严重，这就造成了直接求解时数值不稳定的问题。为了避免这个问题，本文提出了改进，使用HLMDL的方法，在舒尔补矩阵的对角线上加上阻尼因子：
+然而如第~\ref{ch:intro}~章中提到的，在实际求解线性问题时，往往会遇到矩阵秩亏或不正定的情况，而且这种情况在舒尔补矩阵中更为严重，这就造成了直接求解时数值不稳定的问题。为了避免这个问题，本文提出了改进，使用HLMDL的方法，在舒尔补矩阵的对角线上加上阻尼因子：
 \begin{equation}
     \mathrm{S}' \doteq \mathrm{S}+\mu\mathbf{diag}(\mathrm{S})
 \end{equation}
@@ -21,7 +27,9 @@ LM法的阻尼因子会影响正规矩阵的对角线元素，经过舒尔补操
 
 方程\eqref{eq:hlmdl}的求解可以使用任何常用的矩阵分解法，如QR分解、Cholesky分解等。也可以采用迭代式的线性求解方法，比如预处理共轭梯度法（preconditioned conjugate gradient，简称PCG）。本文提出的框架提供了自定义线性求解方法的接口，用户可以自己实现符合实际数值稳定性需求和求解效率要求的线性求解方法，也可以使用内置的Cholesky分解求解器和I-PCG求解器。
 
-由于HLMDL方法在舒尔补方程上施加了阻尼因子，本文没有使用增量式Cholesky分解\citep{polok2013incremental}来求解式\eqref{eq:hlmdl}，而是提供了常规的Cholesky分解法和ICE-BA中提出的I-PCG方法，并配合Jacobi预处理方法\citep{jeong2012pushing}来提升线性求解的效率。
+由于HLMDL方法在舒尔补方程上施加了阻尼因子，本文没有使用增量式Cholesky分解\citep{polok2013incremental}来求解式\eqref{eq:hlmdl}，而是提供了常规的Cholesky分解法和ICE-BA中提出的I-PCG方法，并配合Jacobi预处理方法\citep{jeong2012pushing}来提升线性求解的效率。算法~\ref{alg:hlmdl}描述了HLMDL算法的一次迭代过程。
+
+\input{Chapters/alg_hlmdl.tex}
 
 \subsection{使用PBT方法增量回代}
 
@@ -39,7 +47,7 @@ ICE-BA中使用了直接回代的方法求解三维点状态的增量，即求�
 
 \begin{figure}[htb!]
     \centering
-    \includegraphics[scale=.8]{Pictures/bayes_forest.png}
+    \includegraphics[scale=.9]{Pictures/bayes_forest.png}
     \caption{舒尔补构建的贝叶斯推断树}
     \label{fig:bayes_forest}
 \end{figure}

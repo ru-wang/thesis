@@ -1,0 +1,25 @@
+\begin{algorithm}[htb!]
+\caption{一轮HLMDL算法迭代}
+\begin{algorithmic}
+    \Require 舒尔补方程$\mathrm{S}$，$\bm{b}$，阻尼因子$\mu_i$
+    \Ensure 本轮迭代结果$\bm{\delta}^c$，下一轮阻尼因子$\mu_{i+1}$
+
+    \State 对舒尔补矩阵施加阻尼因子
+    \[
+        \mathrm{S}' \doteq \mathrm{S}+\mu\mathbf{diag}(\mathrm{S})
+    \]
+
+    \State 使用Cholesky分解或I-PCG方法求解新的舒尔补方程
+    \[
+        \bm{\delta}^c = \mathrm{S}' \:\setminus\: \bm{b}
+    \]
+
+    \State 恢复舒尔补矩阵
+    \[
+        \mathrm{S} = \mathrm{S}'-\mu\mathbf{diag}(\mathrm{S})
+    \]
+
+    \State 使用\citen{tingleff2004methods}中的方法调节阻尼因子$\mu_i$，得到$\mu_{i+1}$
+\end{algorithmic}
+\label{alg:hlmdl}
+\end{algorithm}

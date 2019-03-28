@@ -173,7 +173,7 @@ DL法根据当前的信赖域半径$\Delta$和以上求解的两个步长来计�
     \item 如果GN迭代步$\bm{\delta}_{gn}$的模和最速下降迭代步$\bm{\delta}_{sd}$都大于信赖域半径，则选择$\bm{\delta}_{sd}$并将其缩放到信赖域大小；
     \item 如果GN迭代步$\bm{\delta}_{gn}$的模大于信赖域半径而最速下降迭代步的模小于信赖域半径，则需要取$\bm{\delta}_{gn}$和$\bm{\delta}_{sd}$连线与信赖域的交点作为迭代步（如图~\ref{fig:dogleg_step}）。
 \end{enumerate}
-这样，当$\Delta$较大时，DL法更倾向于使用GN法的迭代步$\bm{\delta}_{gn}$；当$\Delta$较小时则更倾向于最速下降法的迭代步$\bm{\delta}_{sd}$。算法~\ref{alg:dogleg}详细描述了DL法的迭代过程。和GN法一样，DL法在求解式\eqref{eq:gn}的时候也可能遇到海森矩阵$\mathrm{H}$半正定的情况，此时应该选择数值稳定的线性求解方法来求解海森矩阵的伪逆$\mathrm{H}^\dag$。
+这样，当$\Delta$较大时，DL法更倾向于使用GN法的迭代步$\bm{\delta}_{gn}$；当$\Delta$较小时则更倾向于最速下降法的迭代步$\bm{\delta}_{sd}$。和GN法一样，DL法在求解式\eqref{eq:gn}的时候也可能遇到海森矩阵$\mathrm{H}$半正定的情况，此时应该选择数值稳定的线性求解方法来求解海森矩阵的伪逆$\mathrm{H}^\dag$。
 
 \begin{figure}[htb!]
     \centering
@@ -182,51 +182,6 @@ DL法根据当前的信赖域半径$\Delta$和以上求解的两个步长来计�
     \caption{信赖域与DL法迭代步（图片引用自\citep{tingleff2004methods}）}
     \label{fig:dogleg_step}
 \end{figure}
-
-\input{Chapters/alg_dogleg.tex}
-
-\subsection{舒尔补}\label{sec:schur}
-
-不论是使用GN法，LM法还是DL法，在每一轮迭代过程中，都需要进一步通过求解正规方程这个线性系统来得到每一轮迭代的步长（如式\eqref{eq:gn}，\eqref{eq:lm}，\eqref{eq:dl}）。根据经验，SLAM问题具有良好的稀疏性：通常三维点状态的数量要远大于相机状态的数量，而且通常三维点之间没有直接联系；同时，只有物理上距离比较接近的三维点状态和相机状态之间有相互约束。因此，由集束调整问题构建的海森矩阵$\mathrm{H}$也具有稀疏的性质，通过对变量适当的排序，将三维点状态和相机状态分别分组，一般可以得到如图~\ref{fig:sparse_matrix}所示的特殊的稀疏结构。
-
-\begin{figure}[htb!]
-    \centering
-    \includegraphics[width=.5\textwidth]{Pictures/sparse_matrix.png}
-    \caption{一般的稀疏矩阵结构：左上角部分为三维点状态对应的海森矩阵，呈对角块稀疏状；右下角部分为相机状态对应的海森矩阵，呈条带稀疏状；左下角矩阵为三维点状态和相机状态的相关海森矩阵，只有具有观测关系的三维点和相机之间的相关部分为非零。}
-    \label{fig:sparse_matrix}
-\end{figure}
-
-对于这样具备特殊稀疏结构的线性系统，可以用舒尔补（Schur complement）来加速求解。舒尔补是一种常用的加速求解稀疏线性系统的方法，特别适用于集束调整问题中的正规方程的求解。其本质上是一种基于高斯消元的分块求解线性系统的方法。首先根据图~\ref{fig:sparse_matrix}对正规方程进行分块：
-\begin{equation}
-    \mathrm{H} =
-    \begin{bmatrix}
-        \mathrm{P} & \mathrm{W}^\top \\
-        \mathrm{W} & \mathrm{C}
-    \end{bmatrix}, \quad
-    \bm{\delta} = \begin{bmatrix} \bm{\delta}^l \\ \bm{\delta}^c \end{bmatrix}, \quad
-    \bm{\eta} = \begin{bmatrix} \bm{l} \\ \bm{c} \end{bmatrix}
-\end{equation}
-其中$\mathrm{P}$是三维点状态对应的海森矩阵，$\mathrm{C}$是相机状态对应的海森矩阵，$\mathrm{W}$是三维点状态和相机状态的海森矩阵。求解三维点状态和相机状态之前，先通过行变换构建舒尔补方程：
-\begin{equation}
-    \left( \mathrm{C}-\mathrm{W}\mathrm{P}^{-1}\mathrm{W}^\top \right)
-    \bm{\delta}^c = \bm{c}-\mathrm{W}\mathrm{P}^{-1}\bm{l}
-    \label{eq:schur_complement}
-\end{equation}
-
-记舒尔补矩阵为$\mathrm{S}\doteq\mathrm{C}-\mathrm{W}\mathrm{P}^{-1}\mathrm{W}^\top$，右侧为$\bm{b}\doteq\bm{c}-\mathrm{W}\mathrm{P}^{-1}\bm{l}$。如前面提到的，集束调整问题中的三维点状态数量远多于相机状态数量，故矩阵$\mathrm{S}$的规模远小于$\mathrm{P}$的规模，通过求解下舒尔补方程：
-\begin{equation}
-    \bm{\delta}^c = \mathrm{S} \:\setminus\: \bm{b}
-    \label{eq:solve_schur}
-\end{equation}
-可以快速先得到相机状态的迭代步。而又因为矩阵$\mathrm{P}$通常呈块对角状，其逆矩阵的求解$\mathrm{P}^{-1}$也非常容易，通过变量回代又可以高效地求解剩余的三维点状态的迭代步：
-\begin{equation}
-    \bm{\delta}^l = \mathrm{P}
-    \:\setminus\:
-    \left( \bm{l}-\mathrm{W}^\top\bm{\delta}^c \right)
-    \label{eq:back_sub}
-\end{equation}
-
-舒尔补可以加速稀疏线性系统的求解，但需要注意的是，舒尔补一般会造成矩阵的填充效应（fill in）\citep{kaess2008isam}，即破坏矩阵稀疏性的情况。在使用舒尔补的时候如果不注意变量的排序，则很容易造成严重的填充。
 
 \subsection{边缘状态估计}
 
@@ -297,4 +252,4 @@ p(\bm{y}) \sim \mathcal{N}
 \end{gathered}
 \end{equation}
 
-如~\ref{sec:schur}~节中提到的，舒尔补一般会造成稀疏矩阵的填充效应，在使用舒尔补进行边缘化操作的时候，同样会遇到这样的情况。因此，在使用边缘化进行状态删减的时候，也需要注意使用合理的策略选择被删减的状态，尽量减少填充。
+舒尔补一般会造成稀疏矩阵的填充效应\citep{kaess2008isam}（fill in），在使用舒尔补进行边缘化操作的时候，同样会遇到这样的情况。因此，在使用边缘化进行状态删减的时候，也需要注意使用合理的策略选择被删减的状态，尽量减少填充。
