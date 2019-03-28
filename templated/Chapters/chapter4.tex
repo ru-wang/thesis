@@ -65,9 +65,15 @@
 
 \subsection{结果对比}
 
-为了保证公平，所有求解器尽可能地设置成相同的算法，并将算法运行时间$T$定义为从问题构建开始到完成求解的总时间。所有优化器均使用稀疏求解策略，本文的优化策略非线性部分为HLMDL法，线性部分为增量舒尔补-Cholesky分解和增量舒尔补I-PCG迭代法。Ceres-Solver的非线性优化策略则选取LM法和DL法，线性部分设置为舒尔补-QR分解法。将所有优化算法的迭代次数设置为相同，通过对比运行时间$T$和迭代次数$t$来比较不同的求解策略的效率。通过对比求解结束时的总能量，即重投影误差目标函数的值$E_{\text{proj}}$和IMU预积分目标函数的值$E_{\text{IMU}}$来对比精度。
+\begin{figure}[htb!]
+    \centering
+    \subfloat[Ceres-LM：Cubic-50点云]{\includegraphics[width=.48\textwidth]{Pictures/cubic_ceres.png}}~
+    \subfloat[HLMDL：Cubic-50点云]{\includegraphics[width=.48\textwidth]{Pictures/cubic_spec3.png}}
+    \caption{Cubic-50运行结果：左图为Ceres-LM求解所得的点云，右图为HLMDL求解所得的点云}
+    \label{fig:cubic}
+\end{figure}
 
-表~\ref{tab:time}展示了时间测试对比结果，包含运行时间、总的迭代次数以及每条实例耗时相对于测试基准耗时的百分比，并将第一行设置为其他测试实例的对比基准。例如第一行代表的是Ceres-Solver的DL法运行结果，使用的非线性策略为DL法，线性策略为舒尔补和QR分解，在Cubic-50数据集上求解共进行$5$次迭代，平均耗时$69$毫秒，相对于基准耗时的百分比为$100\%$。
+为了保证公平，所有求解器尽可能地设置成相同的算法，并将算法运行时间$T$定义为从问题构建开始到完成求解的总时间。所有优化器均使用稀疏求解策略，本文的优化策略非线性部分为HLMDL法，线性部分为增量舒尔补-Cholesky分解和增量舒尔补I-PCG迭代法。Ceres-Solver的非线性优化策略则选取LM法和DL法，线性部分设置为舒尔补-QR分解法。将所有优化算法的迭代次数设置为相同，通过对比运行时间$T$和迭代次数$t$来比较不同的求解策略的效率。通过对比求解结束时的总能量，即重投影误差目标函数的值$E_{\text{proj}}$和IMU预积分目标函数的值$E_{\text{IMU}}$来对比精度。
 
 {
 \linespread{1}
@@ -92,7 +98,7 @@
 \end{table}
 }
 
-表~\ref{tab:energy}展示了精度测试对比结果，每个数据集的初始总能量和求解结束收敛时的总能量。
+表~\ref{tab:time}展示了时间测试对比结果，包含运行时间、总的迭代次数以及每条实例耗时相对于测试基准耗时的百分比，并将第一行设置为其他测试实例的对比基准。例如第一行代表的是Ceres-Solver的DL法运行结果，使用的非线性策略为DL法，线性策略为舒尔补和QR分解，在Cubic-50数据集上求解共进行$5$次迭代，平均耗时$69$毫秒，相对于基准耗时的百分比为$100\%$。
 
 {
 \linespread{1}
@@ -114,17 +120,7 @@
 \end{table}
 }
 
-表~\ref{tab:time}和表~\ref{tab:energy}中，“失败”或“N/A”项代表某求解策略在该数据集上能量无法收敛，相关数据无法提供。
-
-图~\ref{fig:cubic}、图~\ref{fig:venice}和图~\ref{fig:cathedral}分别为使用Ceres-Solver和本文的增量式集束调整框架求解三个数据集所得的点云结果，可以看到，在Cubic-50数据集上，解得的点云质量没有显著差异；在Venice-51数据集上，使用本文提出的HLMDL-增量舒尔补算法解得的点云质量略好于Ceres-Solver解得的点云；而在Cathedral-46数据集上，本文提出的HLMDL-增量舒尔补算法解得的点云质量则要明显好于使用Ceres-Solver解得的点云。
-
-\begin{figure}[htb!]
-    \centering
-    \subfloat[Ceres-LM：Cubic-50点云]{\includegraphics[width=.48\textwidth]{Pictures/cubic_ceres.png}}~
-    \subfloat[HLMDL：Cubic-50点云]{\includegraphics[width=.48\textwidth]{Pictures/cubic_spec3.png}}
-    \caption{Cubic-50运行结果：左图为Ceres-LM求解所得的点云，右图为HLMDL求解所得的点云}
-    \label{fig:cubic}
-\end{figure}
+表~\ref{tab:energy}展示了精度测试对比结果，每个数据集的初始总能量和求解结束收敛时的总能量。表~\ref{tab:time}和表~\ref{tab:energy}中，“失败”或“N/A”项代表某求解策略在该数据集上能量无法收敛，相关数据无法提供。
 
 \begin{figure}[htb!]
     \centering
@@ -146,6 +142,8 @@
     \caption{数据集Cathedral-46运行结果：左列为Ceres-LM求解所得的点云，右列为HLMDL求解所得的点云}
     \label{fig:cathedral}
 \end{figure}
+
+图~\ref{fig:cubic}、图~\ref{fig:venice}和图~\ref{fig:cathedral}分别为使用Ceres-Solver和本文的增量式集束调整框架求解三个数据集所得的点云结果，可以看到，在Cubic-50数据集上，解得的点云质量没有显著差异；在Venice-51数据集上，使用本文提出的HLMDL-增量舒尔补算法解得的点云质量略好于Ceres-Solver解得的点云；而在Cathedral-46数据集上，本文提出的HLMDL-增量舒尔补算法解得的点云质量则要明显好于使用Ceres-Solver解得的点云。
 
 综上所述，基于本文提出的增量式集束调整框架无论是在效率还是在精度上都达到了可用的水准。不同的数据集测试结果表示，在精度接近的情况下，本文提出的HLMDL-增量舒尔补算法相对于Ceres-Solver的测试基准，求解时间减少了$84.3\%$至$62.5\%$不等，显著提升了效率。
 
