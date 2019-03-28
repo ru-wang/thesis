@@ -27,8 +27,8 @@
 
 \begin{figure}[htb!]
     \centering
-    \includegraphics[width=.49\textwidth]{Pictures/curse_fitting_ceres.png}
-    \includegraphics[width=.49\textwidth]{Pictures/curse_fitting_spec3.png}
+    \subfloat[Ceres-LM：曲线拟合结果]{\includegraphics[width=.48\textwidth]{Pictures/curse_fitting_ceres.png}}~
+    \subfloat[HLMDL：曲线拟合结果]{\includegraphics[width=.48\textwidth]{Pictures/curse_fitting_spec3.png}}
     \caption{曲线拟合运行结果：左图为Ceres-LM求解所得的拟合曲线，右图为HLMDL求解所得的拟合曲线}
     \label{fig:curve}
 \end{figure}
@@ -120,25 +120,30 @@
 
 \begin{figure}[htb!]
     \centering
-    \includegraphics[width=.49\textwidth]{Pictures/cubic_ceres.png}
-    \includegraphics[width=.49\textwidth]{Pictures/cubic_spec3.png}
-    \caption{数据集Cubic-50运行结果：左图为Ceres-LM求解所得的点云，右图为HLMDL求解所得的点云}
+    \subfloat[Ceres-LM：Cubic-50点云]{\includegraphics[width=.48\textwidth]{Pictures/cubic_ceres.png}}~
+    \subfloat[HLMDL：Cubic-50点云]{\includegraphics[width=.48\textwidth]{Pictures/cubic_spec3.png}}
+    \caption{Cubic-50运行结果：左图为Ceres-LM求解所得的点云，右图为HLMDL求解所得的点云}
     \label{fig:cubic}
 \end{figure}
 
 \begin{figure}[htb!]
     \centering
-    \includegraphics[width=.49\textwidth]{Pictures/venice_ceres.png}
-    \includegraphics[width=.49\textwidth]{Pictures/venice_spec3.png}
-    \caption{数据集Venice-51运行结果：左图为Ceres-LM求解所得的点云，右图为HLMDL求解所得的点云}
+    \subfloat[Ceres-LM：Venice-51正视图]{\includegraphics[width=.48\textwidth]{Pictures/venice_ceres.png}}~
+    \subfloat[HLMDL：Venice-51正视图]{\includegraphics[width=.48\textwidth]{Pictures/venice_spec3.png}}
+    \\
+    \subfloat[Ceres-LM：Venice-51俯视图]{\includegraphics[width=.48\textwidth]{Pictures/venice_ceres_up.png}}~
+    \subfloat[HLMDL：Venice-51俯视图]{\includegraphics[width=.48\textwidth]{Pictures/venice_spec3_up.png}}
+    \caption{数据集Venice-51运行结果：左列为Ceres-LM求解所得的点云，右列为HLMDL求解所得的点云}
     \label{fig:venice}
 \end{figure}
 
 \begin{figure}[htb!]
-    \centering
-    \includegraphics[width=.49\textwidth]{Pictures/cathedral_ceres.png}
-    \includegraphics[width=.49\textwidth]{Pictures/cathedral_spec3.png}
-    \caption{数据集Cathedral-46运行结果：左图为Ceres-LM求解所得的点云，右图为HLMDL求解所得的点云}
+    \subfloat[Ceres-LM：Cathedral-46正视图]{\includegraphics[width=.48\textwidth]{Pictures/cathedral_ceres.png}}~
+    \subfloat[HLMDL：Cathedral-46正视图]{\includegraphics[width=.48\textwidth]{Pictures/cathedral_spec3.png}}
+    \\
+    \subfloat[Ceres-LM：Cathedral-46俯视图]{\includegraphics[width=.48\textwidth]{Pictures/cathedral_ceres_up.png}}~
+    \subfloat[HLMDL：Cathedral-46俯视图]{\includegraphics[width=.48\textwidth]{Pictures/cathedral_spec3_up.png}}
+    \caption{数据集Cathedral-46运行结果：左列为Ceres-LM求解所得的点云，右列为HLMDL求解所得的点云}
     \label{fig:cathedral}
 \end{figure}
 
